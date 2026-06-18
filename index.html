@@ -124,6 +124,28 @@
   .btn-o:hover { background: #fff0ec; }
 
   @media print { .actions { display: none; } }
+
+  /* API fetch section */
+  .key-row, .url-row { display: flex; gap: 6px; margin-bottom: 8px; }
+  .key-row input, .url-row input {
+    flex: 1; padding: 8px 10px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 12px; outline: none;
+  }
+  .key-row input:focus, .url-row input:focus { border-color: var(--shopee); }
+  .btn-primary { background: var(--shopee); color: #fff; border: none; border-radius: 6px; padding: 8px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn-primary:hover { background: #d4431f; }
+  .btn-sm { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; color: var(--muted); }
+  .btn-sm:hover { border-color: var(--shopee); color: var(--shopee); }
+  .api-status { font-size: 12px; margin-top: 8px; padding: 7px 10px; border-radius: 6px; line-height: 1.5; }
+  .api-status.loading { background: #e3f2fd; color: #1565c0; }
+  .api-status.error   { background: var(--red-bg); color: var(--red); }
+  .api-status.ok      { background: var(--green-bg); color: var(--green); }
+  .product-card { display: flex; gap: 10px; align-items: flex-start; padding: 10px; background: #f9f9f9; border: 1px solid var(--border); border-radius: 8px; margin-top: 10px; }
+  .product-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; flex-shrink: 0; background: #eee; }
+  .product-info { flex: 1; min-width: 0; }
+  .product-name { font-size: 12px; font-weight: 600; line-height: 1.4; margin-bottom: 4px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .product-price { font-size: 17px; font-weight: 900; color: var(--shopee); margin-bottom: 2px; }
+  .product-meta { font-size: 11px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -138,6 +160,31 @@
 
     <!-- COLUNA ESQUERDA -->
     <div>
+
+      <div class="card">
+        <h2>🔗 Buscar dados do anúncio</h2>
+        <div class="key-row">
+          <input type="password" id="gecko_key" placeholder="Chave GeckoAPI (Bearer Token)" autocomplete="off">
+          <button class="btn-sm" onclick="saveKey()">💾 Salvar</button>
+        </div>
+        <div class="url-row">
+          <input type="url" id="produto_url" placeholder="https://shopee.com.br/produto-i.123.456">
+          <button class="btn-primary" onclick="fetchProduct()">🔍 Buscar</button>
+        </div>
+        <div id="api_status" style="display:none" class="api-status"></div>
+        <div id="product_card" style="display:none" class="product-card">
+          <img id="prod_thumb" class="product-thumb" src="" alt="">
+          <div class="product-info">
+            <div class="product-name" id="prod_name">—</div>
+            <div class="product-price" id="prod_price">—</div>
+            <div class="product-meta" id="prod_meta">—</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6">
+          Requer conta na <a href="https://dashboard.geckoapi.com.br" target="_blank" style="color:var(--shopee)">GeckoAPI</a>.
+          Cole a URL do seu anúncio ativo para ver sua margem real ao preço atual. A chave fica salva no navegador.
+        </div>
+      </div>
 
       <div class="card">
         <h2>📦 Custos do produto</h2>
@@ -246,6 +293,17 @@
         <div class="fee-row"><span class="lbl">Custo efetivo sobre a venda</span><span class="val orange" id="fd_efetivo_pct">—</span></div>
       </div>
 
+      <div class="card" id="analise_card" style="display:none">
+        <h2>📍 Análise do preço atual do anúncio</h2>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px" id="analise_label">—</div>
+        <div class="fee-row"><span class="lbl">Preço do anúncio</span><span class="val" style="color:var(--shopee);font-size:15px" id="an_preco">—</span></div>
+        <div class="fee-row"><span class="lbl">Faixa detectada</span><span class="val" id="an_faixa">—</span></div>
+        <div class="fee-row"><span class="lbl">Shopee + ADS + Imposto (R$)</span><span class="val red" id="an_shopee">—</span></div>
+        <div class="fee-row"><span class="lbl">CMV + Embalagem (R$)</span><span class="val red" id="an_fixo">—</span></div>
+        <div class="fee-row"><span class="lbl"><strong>Lucro/unidade</strong></span><span class="val" id="an_lucro">—</span></div>
+        <div class="fee-row" style="border-bottom:none"><span class="lbl"><strong>Margem atual</strong></span><span style="font-size:20px;font-weight:900" id="an_margem">—</span></div>
+      </div>
+
       <div class="card">
         <h2>📊 Resultado</h2>
 
@@ -285,6 +343,106 @@
 </div>
 
 <script>
+// ── Estado global do produto buscado via API ──────────────────────────
+let fetchedPrice = null;
+
+// ── GeckoAPI ──────────────────────────────────────────────────────────
+function saveKey() {
+  const key = document.getElementById('gecko_key').value.trim();
+  if (!key) return;
+  localStorage.setItem('gecko_key', key);
+  showStatus('✅ Chave salva no navegador.', 'ok');
+  setTimeout(hideStatus, 2500);
+}
+
+function showStatus(msg, cls) {
+  const el = document.getElementById('api_status');
+  el.style.display = '';
+  el.className = 'api-status ' + cls;
+  el.textContent = msg;
+}
+function hideStatus() { document.getElementById('api_status').style.display = 'none'; }
+
+async function fetchProduct() {
+  const key = document.getElementById('gecko_key').value.trim()
+            || localStorage.getItem('gecko_key') || '';
+  const url = document.getElementById('produto_url').value.trim();
+
+  if (!key) { showStatus('❌ Insira sua chave da GeckoAPI e clique em Salvar.', 'error'); return; }
+  if (!url || !url.includes('shopee.com.br')) {
+    showStatus('❌ URL inválida. Cole a URL completa de um produto da Shopee.', 'error'); return;
+  }
+
+  showStatus('⏳ Buscando dados do produto… pode levar até 60 segundos.', 'loading');
+  document.getElementById('product_card').style.display = 'none';
+  fetchedPrice = null;
+  calc();
+
+  try {
+    const res = await fetch('https://api.geckoapi.com.br/v1/extract', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, target: 'shopee.com.br', type: 'pdp' })
+    });
+    const json = await res.json();
+
+    if (!res.ok) {
+      const code = json?.errorCode || res.status;
+      showStatus(`❌ Erro ${code}: verifique sua chave e tente novamente.`, 'error');
+      return;
+    }
+    if (json.notFound || !json.data) {
+      showStatus('❌ Produto não encontrado. Verifique a URL.', 'error');
+      return;
+    }
+
+    const d = json.data;
+    hideStatus();
+
+    // preço: tenta price, depois regularPrice
+    const price = (typeof d.price === 'number') ? d.price
+                : (typeof d.regularPrice === 'number') ? d.regularPrice : null;
+    fetchedPrice = price;
+
+    // thumbnail
+    const thumb = document.getElementById('prod_thumb');
+    thumb.src = d.mainImage?.url || '';
+    thumb.onerror = () => thumb.style.display = 'none';
+
+    document.getElementById('prod_name').textContent  = d.name || '—';
+    document.getElementById('prod_price').textContent = price ? fmt(price) : 'Preço não disponível pela API';
+
+    const meta = [];
+    if (d.soldCount)                        meta.push(`${d.soldCount} vendidos`);
+    if (d.aggregateRating?.ratingValue)     meta.push(`⭐ ${d.aggregateRating.ratingValue.toFixed(1)} (${d.aggregateRating.reviewCount || 0} avaliações)`);
+    if (typeof d.stock === 'number')        meta.push(`Estoque: ${d.stock}`);
+    document.getElementById('prod_meta').textContent = meta.join(' · ') || '—';
+    document.getElementById('product_card').style.display = 'flex';
+
+    calc(); // recalc com análise reversa
+  } catch (e) {
+    showStatus('❌ Erro de rede. Verifique sua conexão.', 'error');
+  }
+}
+
+// ── Cálculo reverso: dado um preço, qual é a margem? ─────────────────
+function calcReverse(price, fixedCosts, acosPct, impostoPct, extraRate) {
+  const b = BRACKETS.find(br => price >= br.min && price <= br.max)
+          || BRACKETS[BRACKETS.length - 1];
+  const effectiveRate = b.rate + (b.varFeeRate || 0) + extraRate;
+  const comissaoR  = price * b.rate / 100;
+  const varFeeR    = price * (b.varFeeRate || 0) / 100;
+  const taxaFixaR  = b.fee;
+  const adsR       = price * acosPct / 100;
+  const impostoR   = price * impostoPct / 100;
+  const shopeeTotal = comissaoR + varFeeR + taxaFixaR;
+  const totalCusto  = fixedCosts + shopeeTotal + adsR + impostoR;
+  const lucro       = price - totalCusto;
+  const margem      = price > 0 ? (lucro / price) * 100 : 0;
+  return { b, shopeeTotal, adsR, impostoR, totalCusto, lucro, margem };
+}
+
+// ─────────────────────────────────────────────────────────────────────
 const BRACKETS = [
   { id: 1, label: 'Faixa 1', range: 'até R$ 7,99',        min: 0,   max: 7.99,     rate: 20, fee: 0,  varFeeRate: 50, cls: 'f1' },
   { id: 2, label: 'Faixa 2', range: 'R$ 8 – R$ 79,99',    min: 8,   max: 79.99,    rate: 20, fee: 4,  varFeeRate: 0,  cls: 'f2' },
@@ -382,6 +540,27 @@ function calc() {
   document.getElementById('res_lucro').textContent       = fmt(lucroR);
   document.getElementById('res_lucro_sub').textContent   =
     `Lucro líquido: ${fmt(lucroR)} (${fmtPct(margemPct)} do preço de venda)`;
+
+  // ── Análise reversa do anúncio buscado ───────────────────────────
+  const analiseCard = document.getElementById('analise_card');
+  if (fetchedPrice && fetchedPrice > 0) {
+    const rev = calcReverse(fetchedPrice, fixedCosts, acosPct, impostoPct, extraRate);
+    analiseCard.style.display = '';
+    document.getElementById('analise_label').textContent =
+      `Com seus custos atuais, ao preço de ${fmt(fetchedPrice)} (anúncio ativo):`;
+    document.getElementById('an_preco').textContent  = fmt(fetchedPrice);
+    document.getElementById('an_faixa').textContent  = rev.b.label + ' — ' + rev.b.range;
+    document.getElementById('an_shopee').textContent = fmt(rev.shopeeTotal + rev.adsR + rev.impostoR);
+    document.getElementById('an_fixo').textContent   = fmt(fixedCosts);
+    const lucroEl = document.getElementById('an_lucro');
+    lucroEl.textContent = fmt(rev.lucro);
+    lucroEl.style.color = rev.lucro >= 0 ? 'var(--green)' : 'var(--red)';
+    const margemEl = document.getElementById('an_margem');
+    margemEl.textContent = fmtPct(rev.margem);
+    margemEl.style.color = rev.margem >= 15 ? 'var(--green)' : rev.margem >= 0 ? 'var(--yellow)' : 'var(--red)';
+  } else {
+    analiseCard.style.display = 'none';
+  }
 }
 
 function copyRes() {
@@ -389,7 +568,12 @@ function copyRes() {
   navigator.clipboard.writeText(t).then(() => alert('Copiado!')).catch(() => alert(t));
 }
 
-calc();
+// Carregar chave salva e inicializar
+window.addEventListener('DOMContentLoaded', () => {
+  const savedKey = localStorage.getItem('gecko_key');
+  if (savedKey) document.getElementById('gecko_key').value = savedKey;
+  calc();
+});
 </script>
 </body>
 </html>
