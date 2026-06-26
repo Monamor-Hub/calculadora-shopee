@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora dos Sellers 1.0</title>
+<style>
+  /* ── VARIÁVEIS: MODO CLARO (padrão) ─────────────── */
+  :root {
+    --shopee:    #EE4D2D;
+    --shopee-lt: #fdeee9;
+    --ml:        #FFE600;
+    --ml-dark:   #1B2D71;
+    --ml-lt:     #fffceb;
+    --ml-border: #f0dfa0;
+    --bg:        #f5f6f9;
+    --card:      #ffffff;
+    --text:      #1a1f2b;
+    --muted:     #6b7280;
+    --border:    #e2e5ec;
+    --green:     #16a34a; --green-bg: #eafaf0;
+    --red:       #dc2626; --red-bg:   #fdeaea;
+    --yellow:    #d97706; --yellow-bg:#fff8e1;
+    --blue:      #2563eb; --blue-bg:  #eaf2ff;
+  }
+  /* ── VARIÁVEIS: MODO ESCURO ──────────────────────── */
+  body.dark-mode {
+    --shopee:    #EE4D2D;
+    --shopee-lt: #332a26;
+    --ml:        #FFE600;
+    --ml-dark:   #8fa3e8;
+    --ml-lt:     #2e2c24;
+    --ml-border: #4a4530;
+    --bg:        #262624;
+    --card:      #2f2e2c;
+    --text:      #ECECEA;
+    --muted:     #9b9a97;
+    --border:    #403f3c;
+    --green:     #4ade80; --green-bg: #1f2b22;
+    --red:       #f87171; --red-bg:   #2e2220;
+    --yellow:    #fbbf24; --yellow-bg:#332b1c;
+    --blue:      #93b4f5; --blue-bg:  #232838;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-image: linear-gradient(to right, #fffbe6 0%, #fdfaf2 38%, #fdf6f0 62%, #fff1ea 100%);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    min-height: 100vh;
+    color: var(--text);
+    transition: background-color .25s, color .25s;
+  }
+  body.dark-mode {
+    background-image: linear-gradient(to right, #28261f 0%, #262624 40%, #262624 60%, #2a221d 100%);
+  }
+
+  /* ── GATE ──────────────────────────────────────────── */
+  #gate {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, #1B2D71 0%, #EE4D2D 100%);
+    display: flex; align-items: center; justify-content: center; z-index: 9999;
+  }
+  .gate-box {
+    background: #fff; border-radius: 20px; padding: 40px 36px;
+    max-width: 390px; width: 92%; text-align: center;
+    box-shadow: 0 24px 64px rgba(0,0,0,.28);
+  }
+  body.dark-mode .gate-box { background: #2f2e2c; }
+  .gate-logo  { font-size: 44px; margin-bottom: 10px; }
+  .gate-title { font-size: 19px; font-weight: 900; margin-bottom: 4px; color: var(--text); }
+  .gate-sub   { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+  #input_senha {
+    width: 100%; padding: 14px 16px; border: 2px solid var(--border); border-radius: 10px;
+    font-size: 18px; text-align: center; letter-spacing: 3px; outline: none; margin-bottom: 12px;
+    transition: border-color .15s; background: #fafafa; color: var(--text);
+  }
+  body.dark-mode #input_senha { background: #232220; border-color: var(--border); }
+  #input_senha:focus { border-color: var(--shopee); background: #fff; }
+  body.dark-mode #input_senha:focus { background: #232220; }
+  #input_senha.shake { animation: shake .35s ease; border-color: var(--red); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+  .btn-gate {
+    width: 100%; background: linear-gradient(90deg, #1B2D71, var(--shopee));
+    color: #fff; border: none; border-radius: 10px; padding: 14px;
+    font-size: 15px; font-weight: 800; cursor: pointer; transition: opacity .15s;
+  }
+  .btn-gate:hover { opacity: .88; }
+  #gate_erro   { color: var(--red); font-size: 13px; margin-top: 12px; min-height: 18px; }
+  .gate-footer { font-size: 11px; color: #ccc; margin-top: 20px; }
+  body.dark-mode .gate-footer { color: #74726e; }
+
+  /* ── TOGGLE TEMA ────────────────────────────────── */
+  .theme-toggle {
+    position: fixed; top: 14px; right: 14px; z-index: 10000;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    border-radius: 999px; padding: 8px 16px; font-size: 12px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.10);
+    transition: background .25s, color .25s, border-color .25s;
+  }
+  .theme-toggle:hover { opacity: .82; }
+  @media print { .theme-toggle { display: none; } }
+  @media (max-width: 480px) { .theme-toggle { top: 8px; right: 8px; padding: 7px 12px; font-size: 11px; } }
+
+  /* ── LAYOUT ─────────────────────────────────────── */
+  .container     { max-width: 1300px; margin: 0 auto; padding: 14px 14px 0; }
+  .footer-section{ max-width: 1300px; margin: 0 auto; padding: 0 14px 24px; }
+  .calc-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    column-gap: 18px; row-gap: 4px; align-items: start;
+  }
+  @media (max-width: 840px) { .calc-grid { grid-template-columns: 1fr; } }
+
+  /* ── CABEÇALHOS DE COLUNA ───────────────────────── */
+  .col-header {
+    font-size: 14px; font-weight: 800; padding: 13px 20px;
+    border-radius: 12px 12px 0 0; letter-spacing: .3px;
+  }
+  .col-header.ml {
+    background: linear-gradient(135deg, #FFD700 0%, #FFE600 60%, #FFF066 100%);
+    color: #1B2D71; box-shadow: 0 4px 16px rgba(255,220,0,.40); border-bottom: 3px solid #c8a800;
+  }
+  .col-header.shopee {
+    background: linear-gradient(135deg, #b82d14 0%, #EE4D2D 55%, #ff6344 100%);
+    color: #fff; box-shadow: 0 4px 16px rgba(238,77,45,.30); border-bottom: 3px solid #ffcfbe;
+  }
+  .col-sub { font-size: 10px; opacity: .82; margin-top: 3px; font-weight: 400; }
+
+  /* ── CÉLULAS ─────────────────────────────────────── */
+  .cell {
+    background: var(--card); border-radius: 10px; padding: 16px 18px;
+    border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .sec-header {
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px;
+    padding: 7px 18px; border-radius: 10px 10px 0 0; margin-bottom: -1px;
+  }
+  .sec-header.ml {
+    background: linear-gradient(to right, #fff7a8, #fffce6);
+    color: #1B2D71; border: 1px solid #d8b800; border-bottom: none;
+  }
+  .sec-header.shopee {
+    background: linear-gradient(to right, #fcddd3, #fdf3f0);
+    color: #c23010; border: 1px solid #e8a090; border-bottom: none;
+  }
+  body.dark-mode .sec-header.ml {
+    background: linear-gradient(to right, #332f1f, #2a2722);
+    border-color: #4a4530; color: #d8b860;
+  }
+  body.dark-mode .sec-header.shopee {
+    background: linear-gradient(to right, #332420, #2a1f1c);
+    border-color: #4a3128; color: #e8836a;
+  }
+  .cell.has-header { border-radius: 0 0 10px 10px; }
+
+  .ml-cell     { background: #fffef0; border: 1px solid #d8b800; border-top: none; }
+  .shopee-cell { background: #fff8f4; border: 1px solid #e8a090; border-top: none; }
+  .ml-cell:not(.has-header)     { border-radius: 10px; border-top: 1px solid #d8b800; }
+  .shopee-cell:not(.has-header) { border-radius: 10px; border-top: 1px solid #e8a090; }
+  body.dark-mode .ml-cell     { background: #2c2a24; border-color: #45402e; }
+  body.dark-mode .shopee-cell { background: #2c2725; border-color: #453228; }
+
+  .sec-divider { grid-column: 1 / -1; height: 4px; background: transparent; }
+
+  /* ── CAMPOS ─────────────────────────────────────── */
+  .field { margin-bottom: 0; }
+  .field:last-child { margin-bottom: 0; }
+  .field label { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: 11px; }
+  .input-row { display: flex; align-items: center; }
+  .pfx,.sfx { background: #f2f2f2; border: 1px solid var(--border); padding: 8px 10px; font-size: 13px; color: var(--muted); font-weight: 700; }
+  .pfx { border-right: none; border-radius: 6px 0 0 6px; }
+  .sfx { border-left:  none; border-radius: 0 6px 6px 0; }
+  body.dark-mode .pfx, body.dark-mode .sfx { background: #3a3835; border-color: var(--border); }
+  input[type="number"] {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 0;
+    font-size: 14px; color: var(--text); background: #fff; outline: none; transition: border-color .15s;
+  }
+  .ml-cell     input[type="number"] { background: #fffffa; }
+  .shopee-cell input[type="number"] { background: #fffaf8; }
+  .ml-cell     input[type="number"]:focus { border-color: #1B2D71; background: #fffff5; }
+  .shopee-cell input[type="number"]:focus { border-color: var(--shopee); background: #fff5f2; }
+  .ml-cell     input[type="number"][readonly] { background: #f5f3e0; }
+  .shopee-cell input[type="number"][readonly] { background: #f8f0ee; }
+  body.dark-mode input[type="number"]                            { background: #232220; color: var(--text); border-color: var(--border); }
+  body.dark-mode .ml-cell     input[type="number"]              { background: #28261f; }
+  body.dark-mode .shopee-cell input[type="number"]              { background: #2a2422; }
+  body.dark-mode .ml-cell     input[type="number"]:focus        { border-color: var(--ml); background: #28261f; }
+  body.dark-mode .shopee-cell input[type="number"]:focus        { border-color: var(--shopee); background: #2a2422; }
+  body.dark-mode .ml-cell     input[type="number"][readonly]    { background: #232220; color: var(--muted); }
+  body.dark-mode .shopee-cell input[type="number"][readonly]    { background: #232220; color: var(--muted); }
+
+  select.cat-sel {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 13px; color: var(--text); background: #fff; outline: none; cursor: pointer;
+  }
+  .ml-cell select.cat-sel:focus { border-color: #1B2D71; }
+  body.dark-mode select.cat-sel { background: #232220; color: var(--text); border-color: var(--border); }
+  body.dark-mode .ml-cell select.cat-sel:focus { border-color: var(--ml); }
+
+  .two-in { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .toggle-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .tog {
+    flex: 1; padding: 7px 4px; border: 2px solid var(--border); border-radius: 8px;
+    background: #f5f5f5; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center;
+    transition: all .15s; color: var(--muted);
+  }
+  .tog.on { border-color: #1B2D71; background: var(--ml); color: #1B2D71; }
+  body.dark-mode .tog    { background: #3a3835; border-color: var(--border); color: var(--muted); }
+  body.dark-mode .tog.on { background: var(--ml); color: #1B2D71; border-color: var(--ml); }
+
+  .check-opt {
+    display: flex; align-items: center; gap: 8px; padding: 9px 10px;
+    border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .check-opt input { width:14px; height:14px; accent-color: var(--shopee); }
+  body.dark-mode .check-opt { background: #232220; border-color: var(--border); color: var(--text); }
+
+  .auto-tag {
+    display: inline-block; background: #1B2D71; color: var(--ml);
+    font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-left: 4px;
+  }
+  .note { font-size: 11px; color: var(--muted); line-height: 1.5; margin-top: 8px; }
+
+  /* ── FAIXA SHOPEE ──────────────────────────────── */
+  .bracket-box { border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; border-left: 4px solid; }
+  .bracket-box.f1 { background: var(--red-bg);    border-color: var(--red); }
+  .bracket-box.f2 { background: var(--yellow-bg); border-color: var(--yellow); }
+  .bracket-box.f3 { background: var(--blue-bg);   border-color: var(--blue); }
+  .bracket-box.f4 { background: var(--blue-bg);   border-color: var(--blue); }
+  .bracket-box.f5 { background: var(--green-bg);  border-color: var(--green); }
+  .b-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; opacity:.6; margin-bottom:3px; }
+  .b-name  { font-size:14px; font-weight:800; margin-bottom:4px; color: var(--text); }
+  .b-rate  { font-size:20px; font-weight:900; }
+  .b-det   { font-size:11px; color: var(--muted); }
+
+  .ml-bracket {
+    background: var(--ml-lt); border: 1px solid var(--ml-border);
+    border-left: 4px solid #1B2D71; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;
+  }
+  .ml-bracket .b-name { color: #1B2D71; }
+  .ml-bracket .b-rate { color: #1B2D71; }
+  body.dark-mode .ml-bracket { background: #2a2922; border-color: #454330; border-left-color: var(--ml-dark); }
+  body.dark-mode .ml-bracket .b-name { color: #b8c4ec; }
+  body.dark-mode .ml-bracket .b-rate { color: #c8d2f0; }
+
+  /* ── FEE ROWS ─────────────────────────────────── */
+  .fee-row { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border); }
+  .fee-row:last-child { border-bottom: none; }
+  .fee-row .lbl { color: var(--muted); }
+  .fee-row .val { font-weight: 700; }
+  .fee-row .val.red    { color: var(--red); }
+  .fee-row .val.shopee { color: var(--shopee); }
+  .fee-row .val.ml     { color: #1B2D71; }
+  body.dark-mode .fee-row .val.ml { color: var(--ml-dark); }
+
+  /* ── RESULT BLOCKS ───────────────────────────── */
+  .rb { border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .rb:last-child { margin-bottom:0; }
+  .rb .rl { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin-bottom:3px; }
+  .rb .rv { font-size:22px; font-weight:900; }
+  .rb .rs { font-size:11px; color:var(--muted); margin-top:2px; }
+  .rg { background: var(--green-bg); } .rg .rv { color: var(--green); }
+  .ry { background: var(--yellow-bg); } .ry .rv { color: var(--yellow); }
+  .ro { background: #fff8f5; } .ro .rv { color: var(--shopee); }
+  .rm { background: var(--ml-lt); } .rm .rv { color: #1B2D71; }
+  body.dark-mode .ro { background: #2c2422; }
+  body.dark-mode .rm { background: #28282a; } body.dark-mode .rm .rv { color: #a8b8ec; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* ── TABELAS ────────────────────────────────── */
+  .tbl { width:100%; border-collapse:collapse; font-size:12px; }
+  .tbl th { padding:6px 8px; text-align:left; font-size:11px; }
+  .tbl td { padding:5px 8px; border-bottom:1px solid #f0f0f0; color: var(--text); }
+  body.dark-mode .tbl td { border-bottom-color: var(--border); }
+  .tbl.shopee-tbl th { background: var(--shopee); color: #fff; }
+  .tbl.shopee-tbl tr.ar td { background: #fff0ec; font-weight: 700; color: var(--shopee); }
+  body.dark-mode .tbl.shopee-tbl tr.ar td { background: #2e2220; }
+  .tbl.ml-tbl th { background: #1B2D71; color: var(--ml); }
+
+  .warn-box {
+    background: #fffde7; border: 1px solid #f9a825; border-radius: 8px; padding: 10px 12px;
+    font-size: 12px; color: #5d4037; margin-bottom: 10px; display: none; line-height: 1.5;
+  }
+  body.dark-mode .warn-box { background: #332b1c; border-color: #5a4a28; color: #d4a83a; }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-o {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 6px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .btn-o:hover { background: var(--border); color: var(--text); }
+  body.dark-mode .btn-o:hover { background: #3a3835; }
+  @media print { .actions { display: none; } }
+
+  .footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  @media (max-width:840px) { .footer-grid { grid-template-columns: 1fr; } }
+
+  /* ── LOGO HEADER ─────────────────────────────── */
+  .page-logo {
+    display: flex; align-items: center; justify-content: center;
+    gap: 18px; padding: 28px 20px 20px;
+    background: linear-gradient(180deg, rgba(20,30,50,.04) 0%, transparent 100%);
+  }
+  body.dark-mode .page-logo { background: linear-gradient(180deg, #1e1d1b 0%, transparent 100%); }
+  .logo-icon { font-size: 42px; opacity: .85; }
+  .logo-center { text-align: center; }
+  .logo-cds {
+    display: block; font-size: 56px; font-weight: 900; letter-spacing: 4px; line-height: 1;
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 60%, #ea580c 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(249,115,22,.45));
+  }
+  .logo-name { display: block; font-size: 11px; font-weight: 800; letter-spacing: 3px; color: #f97316; text-transform: uppercase; margin-top: 2px; }
+  .logo-tag  { display: block; font-size: 13px; color: #6b7280; margin-top: 4px; font-weight: 400; }
+  body.dark-mode .logo-tag { color: #c8d0de; }
+  .logo-chart { display: flex; flex-direction: column-reverse; align-items: flex-end; gap: 2px; padding-bottom: 4px; }
+  .bar { border-radius: 3px 3px 0 0; background: linear-gradient(180deg, #f59e0b, #ea580c); box-shadow: 0 0 8px rgba(249,115,22,.5); }
+</style>
+</head>
+<body>
+
+<!-- BOTÃO DE TEMA -->
+<button class="theme-toggle" id="theme_toggle_btn" onclick="toggleTheme()">🌙 Modo escuro</button>
+
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-logo" style="font-size:32px;font-weight:900;background:linear-gradient(135deg,#f59e0b,#ea580c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px">CDS</div>
+    <div class="gate-title">Calculadora dos Sellers 1.0</div>
+    <div class="gate-sub">Mercado Livre &amp; Shopee · Produto exclusivo<br>Insira sua senha de acesso para continuar.</div>
+    <input type="password" id="input_senha" placeholder="••••••••" autofocus
+           onkeydown="if(event.key==='Enter')verificarSenha()">
+    <button class="btn-gate" onclick="verificarSenha()">Entrar →</button>
+    <div id="gate_erro"></div>
+    <div class="gate-footer">Acesso exclusivo · Não compartilhe sua senha</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<div class="page-logo">
+  <span class="logo-icon">🖩</span>
+  <div class="logo-center">
+    <span class="logo-cds">CDS</span>
+    <span class="logo-name">Calculadora dos Sellers 1.0</span>
+    <span class="logo-tag">Precifique certo. Lucre mais.</span>
+  </div>
+  <div class="logo-chart">
+    <div class="bar" style="width:10px;height:14px"></div>
+    <div class="bar" style="width:10px;height:22px"></div>
+    <div class="bar" style="width:10px;height:32px"></div>
+    <div class="bar" style="width:10px;height:42px"></div>
+  </div>
+</div>
+
+<div class="container">
+<div class="calc-grid">
+
+  <div class="col-header ml">
+    🛒 Mercado Livre Brasil
+    <div class="col-sub">Comissões 2026 · Clássico 11–14% · Premium 16–19% · Frete absorvido editável</div>
+  </div>
+  <div class="col-header shopee">
+    🛍️ Shopee Brasil
+    <div class="col-sub">Tabela de comissões 2026 · faixas por preço de venda · vendedor CNPJ</div>
+  </div>
+
+  <div class="sec-header ml">📦 Custos do produto</div>
+  <div class="sec-header shopee">📦 Custos do produto</div>
+
+  <div class="cell has-header ml-cell">
+    <div class="field">
+      <label>Custo do produto (CMV) <span class="hint">quanto você paga pelo item</span></label>
+      <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_costo" value="" min="0" step="0.01" oninput="calcML()"></div>
+    </div>
+    <div class="field">
+      <label>Embalagem <span class="hint">caixa, plástico bolha, etc.</span></label>
+      <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_embalagem" value="" min="0" step="0.01" oninput="calcML()"></div>
+    </div>
+  </div>
+  <div class="cell has-header shopee-cell">
+    <div class="field">
+      <label>Custo do produto (CMV) <span class="hint">quanto você paga pelo item</span></label>
+      <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_costo" value="" min="0" step="0.01" oninput="calcShopee()"></div>
+    </div>
+    <div class="field">
+      <label>Embalagem <span class="hint">caixa, plástico bolha, etc.</span></label>
+      <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_embalagem" value="" min="0" step="0.01" oninput="calcShopee()"></div>
+    </div>
+  </div>
+
+  <div class="sec-header ml" style="margin-top:4px">⚙️ Configurações da plataforma</div>
+  <div class="sec-header shopee" style="margin-top:4px">⚙️ Configurações da plataforma</div>
+
+  <div class="cell has-header ml-cell">
+    <div class="field">
+      <label>Categoria do produto <span class="hint">preenche comissão automaticamente</span></label>
+      <select class="cat-sel" id="ml_categoria" onchange="aplicarCategoria()">
+        <option value="">— Selecione a categoria —</option>
+        <optgroup label="📱 Tecnologia">
+          <option value="11|16">Celulares e Smartphones</option>
+          <option value="11|16">Computação / Informática</option>
+          <option value="11|16">Eletrônicos, Áudio e Vídeo</option>
+          <option value="11|16">Câmeras e Acessórios</option>
+          <option value="11|16">Games e Consoles</option>
+        </optgroup>
+        <optgroup label="🏠 Casa e Construção">
+          <option value="12|17">Eletrodomésticos</option>
+          <option value="14|19">Casa, Móveis e Decoração</option>
+          <option value="12|17">Ferramentas e Construção</option>
+          <option value="14|19">Jardinagem</option>
+        </optgroup>
+        <optgroup label="👗 Moda">
+          <option value="14|19">Roupas e Acessórios</option>
+          <option value="14|19">Calçados</option>
+          <option value="14|19">Bolsas e Malas</option>
+        </optgroup>
+        <optgroup label="⚽ Esporte, Saúde e Beleza">
+          <option value="13|18">Esportes e Fitness</option>
+          <option value="14|19">Beleza e Cuidado Pessoal</option>
+          <option value="13|18">Saúde</option>
+          <option value="14|19">Suplementos</option>
+        </optgroup>
+        <optgroup label="🍼 Bebês e Brinquedos">
+          <option value="13|18">Bebês</option>
+          <option value="14|19">Brinquedos e Hobbies</option>
+        </optgroup>
+        <optgroup label="🚗 Automotivo e Pet">
+          <option value="11|16">Acessórios para Veículos</option>
+          <option value="14|19">Pet Shop</option>
+        </optgroup>
+        <optgroup label="📚 Outros">
+          <option value="14|19">Alimentos e Bebidas</option>
+          <option value="14|19">Livros e Revistas</option>
+          <option value="14|19">Joias e Relógios</option>
+          <option value="14|19">Arte e Papelaria</option>
+          <option value="14|19">Indústria e Comércio</option>
+        </optgroup>
+      </select>
+      <div id="ml_cat_info" style="display:none;margin-top:6px" class="note">
+        ✅ Categoria: <strong id="ml_cat_nome">—</strong> · Clássico <strong id="ml_cat_c">—</strong> · Premium <strong id="ml_cat_p">—</strong>
+      </div>
+    </div>
+    <div class="field" style="margin-top:8px">
+      <label>Tipo de anúncio</label>
+      <div class="toggle-row">
+        <button class="tog on" id="btn_c" onclick="setTipoML('classico')">Clássico</button>
+        <button class="tog"    id="btn_p" onclick="setTipoML('premium')">Premium</button>
+        <button class="tog"    id="btn_a" onclick="setTipoML('ambos')">Comparar ambos</button>
+      </div>
+    </div>
+    <div id="ml_ci">
+      <div class="two-in">
+        <div class="field">
+          <label>Comissão Clássico <span class="auto-tag">AUTO</span></label>
+          <div class="input-row"><input type="number" id="ml_com_c" value="11" min="0" max="30" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+        </div>
+        <div class="field">
+          <label>Frete absorvido <span class="hint">R$ 0 = comprador paga</span></label>
+          <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_frete_c" value="0" min="0" step="0.50" oninput="calcML()"></div>
+        </div>
+      </div>
+    </div>
+    <div id="ml_pi" style="display:none">
+      <div class="two-in">
+        <div class="field">
+          <label>Comissão Premium <span class="auto-tag">AUTO</span></label>
+          <div class="input-row"><input type="number" id="ml_com_p" value="16" min="0" max="30" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+        </div>
+        <div class="field">
+          <label>Frete absorvido — Premium</label>
+          <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_frete_p" value="18" min="0" step="0.5" oninput="calcML()"></div>
+        </div>
+      </div>
+    </div>
+    <div class="note" id="ml_tipo_hint">
+      <strong>Clássico:</strong> 11–14% de comissão · parcelamento com juros ao comprador.<br>
+      <strong>Premium:</strong> 16–19% de comissão · parcelamento em 12x sem juros ao comprador.
+    </div>
+  </div>
+
+  <div class="cell has-header shopee-cell">
+    <div class="field">
+      <label>Campanha de destaque</label>
+      <label class="check-opt" style="margin-top:4px">
+        <input type="checkbox" id="s_campanha" onchange="calcShopee()">
+        Participando de campanha (+2,5% sobre as vendas do período)
+      </label>
+    </div>
+    <div class="note" style="margin-top:12px">
+      <strong>Comissão automática:</strong> a faixa de comissão Shopee é detectada automaticamente com base no preço de venda calculado.
+    </div>
+  </div>
+
+  <div class="sec-header ml" style="margin-top:4px">📊 Imposto &amp; ACOS Objetivo</div>
+  <div class="sec-header shopee" style="margin-top:4px">📊 Imposto &amp; ACOS Objetivo</div>
+
+  <div class="cell has-header ml-cell">
+    <div class="two-in">
+      <div class="field">
+        <label>Imposto <span class="hint">% sobre a venda</span></label>
+        <div class="input-row"><input type="number" id="ml_imposto" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+        <div class="note" style="margin-top:4px">Simples ≈6% · MEI isento</div>
+      </div>
+      <div class="field">
+        <label>ACOS Objetivo <span class="hint">% em anúncios</span></label>
+        <div class="input-row"><input type="number" id="ml_ads" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+        <div class="note" style="margin-top:4px">% do fat. em Product Ads</div>
+      </div>
+    </div>
+  </div>
+  <div class="cell has-header shopee-cell">
+    <div class="two-in">
+      <div class="field">
+        <label>Imposto <span class="hint">% sobre a venda</span></label>
+        <div class="input-row"><input type="number" id="s_imposto" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
+        <div class="note" style="margin-top:4px">Simples ≈6% · MEI isento</div>
+      </div>
+      <div class="field">
+        <label>ACOS Objetivo <span class="hint">% em anúncios</span></label>
+        <div class="input-row"><input type="number" id="s_acos" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
+        <div class="note" style="margin-top:4px">ACOS = Ads ÷ Receita</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header ml" style="margin-top:4px">🎯 Meta de Lucro</div>
+  <div class="sec-header shopee" style="margin-top:4px">🎯 Meta de Lucro</div>
+
+  <div class="cell has-header ml-cell">
+    <div class="field">
+      <label>Margem líquida desejada <span class="hint">% sobre o preço de venda</span></label>
+      <div class="input-row"><input type="number" id="ml_margem" value="" min="0" max="70" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+    </div>
+  </div>
+  <div class="cell has-header shopee-cell">
+    <div class="field">
+      <label>Margem líquida desejada <span class="hint">% sobre o preço de venda</span></label>
+      <div class="input-row"><input type="number" id="s_margem" value="" min="0" max="70" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
+    </div>
+  </div>
+
+  <div class="sec-header ml" style="margin-top:4px">📊 Resultados — Mercado Livre</div>
+  <div class="sec-header shopee" style="margin-top:4px">📊 Resultados — Shopee</div>
+
+  <!-- ML Results -->
+  <div class="cell has-header ml-cell" style="padding:0">
+    <div id="ml_res_c">
+      <div style="padding:16px 18px; border-bottom:1px solid var(--border)">
+        <div class="ml-bracket">
+          <div class="b-label">Anúncio Clássico</div>
+          <div class="b-name" id="mlc_b_name">—</div>
+          <div style="display:flex;gap:20px;margin:4px 0">
+            <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="mlc_rate">—</div></div>
+            <div><div style="font-size:10px;color:var(--muted)">Frete absorvido</div><div class="b-rate" id="mlc_fee_disp">—</div></div>
+          </div>
+        </div>
+        <div class="fee-row"><span class="lbl">Comissão ML Clássico</span><span class="val red" id="mlc_comissao">—</span></div>
+        <div class="fee-row"><span class="lbl">Frete absorvido pelo vendedor</span><span class="val red" id="mlc_frete">—</span></div>
+        <div class="fee-row"><span class="lbl">ACOS Objetivo (<span id="mlc_ads_pct">—</span>)</span><span class="val red" id="mlc_ads">—</span></div>
+        <div class="fee-row"><span class="lbl">Imposto (<span id="mlc_imp_pct">—</span>)</span><span class="val red" id="mlc_imposto_val">—</span></div>
+        <div class="fee-row"><span class="lbl"><strong>Total taxas + imposto + ads</strong></span><span class="val ml" id="mlc_total">—</span></div>
+        <div class="fee-row"><span class="lbl">Custo efetivo sobre a venda</span><span class="val ml" id="mlc_efetivo_pct">—</span></div>
+        <div class="rb rm" style="margin-top:12px"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="mlc_breakeven">—</div><div class="rs">Abaixo disso você opera no prejuízo</div></div>
+        <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlc_recomendado">—</div><div class="rs" id="mlc_lucro_sub">—</div></div>
+        <div class="two-col">
+          <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="mlc_custos">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="ml_res_p" style="display:none">
+      <div style="padding:16px 18px; border-bottom:1px solid var(--border)">
+        <div class="ml-bracket">
+          <div class="b-label">Anúncio Premium</div>
+          <div class="b-name" id="mlp_b_name">—</div>
+          <div style="display:flex;gap:20px;margin:4px 0">
+            <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="mlp_rate">—</div></div>
+            <div><div style="font-size:10px;color:var(--muted)">Frete</div><div class="b-rate" id="mlp_frete_rate">—</div></div>
+          </div>
+        </div>
+        <div class="fee-row"><span class="lbl">Comissão ML Premium</span><span class="val red" id="mlp_comissao">—</span></div>
+        <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlp_frete">—</span></div>
+        <div class="fee-row"><span class="lbl">ACOS Objetivo (<span id="mlp_ads_pct">—</span>)</span><span class="val red" id="mlp_ads">—</span></div>
+        <div class="fee-row"><span class="lbl">Imposto (<span id="mlp_imp_pct">—</span>)</span><span class="val red" id="mlp_imposto_val">—</span></div>
+        <div class="fee-row"><span class="lbl"><strong>Total taxas + imposto + ads</strong></span><span class="val ml" id="mlp_total">—</span></div>
+        <div class="fee-row"><span class="lbl">Custo efetivo sobre a venda</span><span class="val ml" id="mlp_efetivo_pct">—</span></div>
+        <div class="rb rm" style="margin-top:12px"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="mlp_breakeven">—</div><div class="rs">Abaixo disso você opera no prejuízo</div></div>
+        <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlp_recomendado">—</div><div class="rs" id="mlp_lucro_sub">—</div></div>
+        <div class="two-col">
+          <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="mlp_custos">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div id="ml_cmp" style="display:none">
+      <div style="padding:16px 18px">
+        <div style="font-size:12px;font-weight:700;color:#1B2D71;margin-bottom:8px">⚖️ Comparativo Clássico vs Premium</div>
+        <table class="tbl ml-tbl">
+          <tr><th></th><th>Clássico</th><th>Premium</th></tr>
+          <tr><td style="color:var(--muted)">Preço mínimo</td><td id="cmp_break_c" style="font-weight:700">—</td><td id="cmp_break_p" style="font-weight:700">—</td></tr>
+          <tr><td style="color:var(--muted)">Preço recomendado</td><td id="cmp_rec_c" style="font-weight:800">—</td><td id="cmp_rec_p" style="font-weight:800">—</td></tr>
+          <tr><td style="color:var(--muted)">Lucro/unidade</td><td id="cmp_lucro_c">—</td><td id="cmp_lucro_p">—</td></tr>
+          <tr><td style="color:var(--muted)">Custo efetivo</td><td id="cmp_ef_c">—</td><td id="cmp_ef_p">—</td></tr>
+        </table>
+      </div>
+    </div>
+    <div style="padding:12px 18px">
+      <div class="actions">
+        <button class="btn-o" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="btn-o" onclick="copyRes()">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shopee Results -->
+  <div class="cell has-header shopee-cell" style="padding:0">
+    <div style="padding:16px 18px; border-bottom:1px solid var(--border)">
+      <div id="s_warn" class="warn-box"></div>
+      <div class="bracket-box f2" id="s_bracket">
+        <div class="b-label">Faixa aplicada (automática)</div>
+        <div class="b-name" id="s_b_name">—</div>
+        <div style="display:flex;gap:20px;margin:4px 0">
+          <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="s_b_rate">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted)">Taxa fixa</div><div class="b-rate" id="s_b_fee">—</div></div>
+        </div>
+        <div class="b-det" id="s_b_det">—</div>
+      </div>
+      <div class="fee-row"><span class="lbl">Comissão Shopee</span><span class="val red" id="s_comissao">—</span></div>
+      <div class="fee-row"><span class="lbl">Taxa fixa por item</span><span class="val red" id="s_taxa_fixa">—</span></div>
+      <div class="fee-row"><span class="lbl">ACOS Objetivo (<span id="s_acos_pct">—</span>)</span><span class="val red" id="s_ads">—</span></div>
+      <div class="fee-row"><span class="lbl">Imposto (<span id="s_imp_pct">—</span>)</span><span class="val red" id="s_imposto_val">—</span></div>
+      <div class="fee-row"><span class="lbl"><strong>Total Shopee + ads + imposto</strong></span><span class="val shopee" id="s_total">—</span></div>
+      <div class="fee-row"><span class="lbl">Custo efetivo sobre a venda</span><span class="val shopee" id="s_efetivo_pct">—</span></div>
+      <div class="rb ro" style="margin-top:12px"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="s_breakeven">—</div><div class="rs">Abaixo deste preço você opera no prejuízo</div></div>
+      <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="s_recomendado">—</div><div class="rs" id="s_lucro_sub">—</div></div>
+      <div class="two-col">
+        <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="s_custos">—</div></div>
+        <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="s_lucro">—</div></div>
+      </div>
+    </div>
+    <div style="padding:12px 18px">
+      <div class="actions">
+        <button class="btn-o" onclick="window.print()">🖨️ Imprimir</button>
+        <button class="btn-o" onclick="copyRes()">📋 Copiar</button>
+      </div>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- RODAPÉ -->
+<div class="footer-section">
+  <div class="footer-grid" style="margin-top:4px">
+    <div>
+      <div class="sec-header ml">📋 Referência de comissões — Mercado Livre 2026</div>
+      <div class="cell has-header" style="padding:12px 14px">
+        <table class="tbl ml-tbl">
+          <tr><th>Categoria</th><th>Clássico</th><th>Premium</th></tr>
+          <tr><td>Celulares e Smartphones</td><td>11%</td><td>16%</td></tr>
+          <tr><td>Eletrônicos / Informática / Games</td><td>11–13%</td><td>16–18%</td></tr>
+          <tr><td>Acessórios para Veículos</td><td>11–12%</td><td>16–17%</td></tr>
+          <tr><td>Eletrodomésticos / Ferramentas</td><td>12–13%</td><td>17–18%</td></tr>
+          <tr><td>Esportes / Saúde / Bebês</td><td>12–14%</td><td>17–19%</td></tr>
+          <tr><td>Beleza / Casa / Moda / Pet / Joias</td><td>13–14%</td><td>18–19%</td></tr>
+        </table>
+        <div class="note" style="margin-top:8px">
+          <strong>Desde mar/2026:</strong> taxa fixa extinta. Frete é variável (peso × dimensões × preço — 261 combinações). Informe o frete real na calculadora.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="sec-header shopee">📋 Faixas de comissão — Shopee 2026</div>
+      <div class="cell has-header" style="padding:12px 14px">
+        <table class="tbl shopee-tbl" id="s_faixa_table">
+          <tr><th>Faixa</th><th>Preço de venda</th><th>Comissão</th><th>Taxa fixa</th></tr>
+          <tr data-faixa="1"><td>1</td><td>até R$ 7,99</td><td>20%</td><td>50% do preço</td></tr>
+          <tr data-faixa="2"><td>2</td><td>R$ 8 – R$ 79,99</td><td>20%</td><td>R$ 4,00</td></tr>
+          <tr data-faixa="3"><td>3</td><td>R$ 80 – R$ 99,99</td><td>14%</td><td>R$ 16,00</td></tr>
+          <tr data-faixa="4"><td>4</td><td>R$ 100 – R$ 199,99</td><td>14%</td><td>R$ 20,00</td></tr>
+          <tr data-faixa="5"><td>5</td><td>R$ 200+</td><td>14%</td><td>R$ 26,00</td></tr>
+        </table>
+        <div class="note" style="margin-top:8px">Faixa 1: 20% + taxa variável de 50% do preço de venda.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+const SENHA_CORRETA = 'cdsi2026';
+
+/* ── TEMA ───────────────────────────────────────────── */
+function setTheme(mode) {
+  const dark = mode === 'dark';
+  document.body.classList.toggle('dark-mode', dark);
+  try { localStorage.setItem('cds_theme', dark ? 'dark' : 'light'); } catch(e) {}
+  const btn = document.getElementById('theme_toggle_btn');
+  if (btn) btn.textContent = dark ? '☀️ Modo claro' : '🌙 Modo escuro';
+}
+function toggleTheme() {
+  setTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
+}
+(function() {
+  let saved = null;
+  try { saved = localStorage.getItem('cds_theme'); } catch(e) {}
+  setTheme(saved === 'dark' ? 'dark' : 'light');
+})();
+
+/* ── GATE ───────────────────────────────────────────── */
+function verificarSenha() {
+  if (document.getElementById('input_senha').value === SENHA_CORRETA) {
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display  = '';
+    calcShopee(); calcML();
+  } else {
+    const inp = document.getElementById('input_senha');
+    document.getElementById('gate_erro').textContent = '❌ Senha incorreta.';
+    inp.classList.add('shake'); inp.value = '';
+    setTimeout(() => { inp.classList.remove('shake'); inp.focus(); }, 400);
+    setTimeout(() => { document.getElementById('gate_erro').textContent = ''; }, 3000);
+  }
+}
+
+/* ── CATEGORIA ML ───────────────────────────────────── */
+function aplicarCategoria() {
+  const sel = document.getElementById('ml_categoria');
+  const val = sel.value;
+  if (!val) { document.getElementById('ml_cat_info').style.display = 'none'; return; }
+  const [c, p] = val.split('|').map(Number);
+  document.getElementById('ml_com_c').value = c;
+  document.getElementById('ml_com_p').value = p;
+  document.getElementById('ml_cat_nome').textContent = sel.options[sel.selectedIndex].text;
+  document.getElementById('ml_cat_c').textContent = c + '%';
+  document.getElementById('ml_cat_p').textContent = p + '%';
+  document.getElementById('ml_cat_info').style.display = '';
+  calcML();
+}
+
+/* ── SHOPEE ─────────────────────────────────────────── */
+const BRACKETS = [
+  { id:1, label:'Faixa 1', range:'até R$ 7,99',        min:0,   max:7.99,    rate:20, fee:0,  varFeeRate:50, cls:'f1' },
+  { id:2, label:'Faixa 2', range:'R$ 8 – R$ 79,99',    min:8,   max:79.99,   rate:20, fee:4,  varFeeRate:0,  cls:'f2' },
+  { id:3, label:'Faixa 3', range:'R$ 80 – R$ 99,99',   min:80,  max:99.99,   rate:14, fee:16, varFeeRate:0,  cls:'f3' },
+  { id:4, label:'Faixa 4', range:'R$ 100 – R$ 199,99', min:100, max:199.99,  rate:14, fee:20, varFeeRate:0,  cls:'f4' },
+  { id:5, label:'Faixa 5', range:'R$ 200+',             min:200, max:Infinity,rate:14, fee:26, varFeeRate:0,  cls:'f5' },
+];
+const fmt    = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+const fmtPct = v => v.toFixed(1).replace('.', ',') + '%';
+
+function findShopee(fixed, varDec, extra) {
+  const eff = BRACKETS.map(b => ({ ...b, rate: b.rate + extra, total: b.rate + b.varFeeRate + extra }));
+  for (const b of eff) {
+    const d = 1 - b.total / 100 - varDec;
+    if (d <= 0) continue;
+    const P = (fixed + b.fee) / d;
+    if (P >= b.min && P <= b.max) return { P, b, orig: BRACKETS.find(x => x.id === b.id) };
+  }
+  const b = eff[eff.length - 1];
+  const d = 1 - b.total / 100 - varDec;
+  return { P: d > 0 ? (fixed + b.fee) / d : 0, b, orig: BRACKETS[BRACKETS.length - 1] };
+}
+
+function calcShopee() {
+  const costo = parseFloat(document.getElementById('s_costo').value)    || 0;
+  const emb   = parseFloat(document.getElementById('s_embalagem').value)|| 0;
+  const acos  = parseFloat(document.getElementById('s_acos').value)     || 0;
+  const imp   = parseFloat(document.getElementById('s_imposto').value)  || 0;
+  const mar   = parseFloat(document.getElementById('s_margem').value)   || 0;
+  const extra = document.getElementById('s_campanha').checked ? 2.5 : 0;
+  const fixed = costo + emb;
+
+  const bkR = findShopee(fixed, (acos + imp) / 100, extra);
+  const rcR = findShopee(fixed, (acos + imp + mar) / 100, extra);
+  const rec = rcR.P, br = rcR.b;
+  const comR = rec * br.rate / 100, vfR = rec * (br.varFeeRate||0) / 100;
+  const tfR = br.fee, adsR = rec*acos/100, impR = rec*imp/100, lucR = rec*mar/100;
+  const shopT = comR + vfR + tfR, totC = fixed + shopT + adsR + impR;
+  const efPct = rec > 0 ? (shopT + adsR + impR) / rec * 100 : 0;
+
+  document.getElementById('s_bracket').className = 'bracket-box ' + rcR.orig.cls;
+  document.getElementById('s_b_name').textContent = br.label + ' — ' + rcR.orig.range;
+  document.getElementById('s_b_rate').textContent = br.rate + '%';
+  document.getElementById('s_b_fee').textContent  = br.varFeeRate ? `${br.varFeeRate}% do preço` : fmt(tfR);
+  document.getElementById('s_b_det').textContent  = br.varFeeRate
+    ? `Comissão ${br.rate}% + taxa variável ${br.varFeeRate}% do preço` + (extra ? ' + campanha 2,5%' : '')
+    : `Comissão ${br.rate}% + taxa fixa ${fmt(tfR)}` + (extra ? ' + campanha 2,5%' : '');
+  document.getElementById('s_comissao').textContent    = fmt(comR);
+  document.getElementById('s_taxa_fixa').textContent   = br.varFeeRate ? `${fmt(vfR)} (${br.varFeeRate}% do preço)` : fmt(tfR);
+  document.getElementById('s_acos_pct').textContent    = fmtPct(acos);
+  document.getElementById('s_ads').textContent         = fmt(adsR);
+  document.getElementById('s_imp_pct').textContent     = fmtPct(imp);
+  document.getElementById('s_imposto_val').textContent = fmt(impR);
+  document.getElementById('s_total').textContent       = fmt(shopT + adsR + impR);
+  document.getElementById('s_efetivo_pct').textContent = fmtPct(efPct);
+  document.getElementById('s_breakeven').textContent   = fmt(bkR.P);
+  document.getElementById('s_recomendado').textContent = fmt(rec);
+  document.getElementById('s_custos').textContent      = fmt(totC);
+  document.getElementById('s_lucro').textContent       = fmt(lucR);
+  document.getElementById('s_lucro_sub').textContent   = `Lucro líquido: ${fmt(lucR)} (${fmtPct(mar)} do preço de venda)`;
+  document.querySelectorAll('#s_faixa_table tr[data-faixa]').forEach(r =>
+    r.classList.toggle('ar', r.dataset.faixa === String(rcR.orig.id)));
+  const w = document.getElementById('s_warn');
+  const nx = rcR.orig.id < 5 ? BRACKETS[rcR.orig.id].min : null;
+  if (nx && Math.abs(rec - nx) < 5) {
+    w.style.display = '';
+    w.innerHTML = `<strong>⚠️ Preço próximo da fronteira de faixa!</strong><br>${fmt(rec)} está perto de R$ ${nx.toFixed(2)}.`;
+  } else { w.style.display = 'none'; }
+}
+
+/* ── MERCADO LIVRE ──────────────────────────────────── */
+let tipoML = 'classico';
+
+function setTipoML(t) {
+  tipoML = t;
+  document.getElementById('btn_c').classList.toggle('on', t==='classico'||t==='ambos');
+  document.getElementById('btn_p').classList.toggle('on', t==='premium' ||t==='ambos');
+  document.getElementById('btn_a').classList.toggle('on', t==='ambos');
+  document.getElementById('ml_ci').style.display    = (t==='classico'||t==='ambos') ? '' : 'none';
+  document.getElementById('ml_pi').style.display    = (t==='premium' ||t==='ambos') ? '' : 'none';
+  document.getElementById('ml_res_c').style.display = (t==='classico'||t==='ambos') ? '' : 'none';
+  document.getElementById('ml_res_p').style.display = (t==='premium' ||t==='ambos') ? '' : 'none';
+  document.getElementById('ml_cmp').style.display   = (t==='ambos')  ? '' : 'none';
+  const h = document.getElementById('ml_tipo_hint');
+  h.innerHTML = t==='classico' ? '<strong>Clássico:</strong> 11–14% comissão · parcelamento com juros ao comprador.'
+    : t==='premium' ? '<strong>Premium:</strong> 16–19% comissão · 12x sem juros ao comprador.'
+    : 'Comparando <strong>Clássico</strong> e <strong>Premium</strong> simultaneamente.';
+  calcML();
+}
+
+function calcMLMode(fixed, com, frete, ads, imp, mar) {
+  const vB = (com + ads + imp) / 100, vR = (com + ads + imp + mar) / 100;
+  const bk = (1-vB) > 0 ? (fixed+frete)/(1-vB) : 0;
+  const rc = (1-vR) > 0 ? (fixed+frete)/(1-vR) : 0;
+  const comR=rc*com/100, adsR=rc*ads/100, impR=rc*imp/100, lucR=rc*mar/100;
+  const totF = comR+frete+adsR+impR;
+  return { bk, rc, comR, adsR, impR, lucR, totF, totC: fixed+totF, ef: rc>0?totF/rc*100:0 };
+}
+
+function calcML() {
+  const fixed = (parseFloat(document.getElementById('ml_costo').value)    ||0)
+              + (parseFloat(document.getElementById('ml_embalagem').value) ||0);
+  const imp = parseFloat(document.getElementById('ml_imposto').value)||0;
+  const mar = parseFloat(document.getElementById('ml_margem').value) ||0;
+  const ads = parseFloat(document.getElementById('ml_ads').value)    ||0;
+
+  if (tipoML==='classico'||tipoML==='ambos') {
+    const com   = parseFloat(document.getElementById('ml_com_c').value)   ||0;
+    const frete = parseFloat(document.getElementById('ml_frete_c').value) ||0;
+    const r = calcMLMode(fixed,com,frete,ads,imp,mar);
+    document.getElementById('mlc_b_name').textContent   = `Comissão: ${com}% · Frete absorvido: ${fmt(frete)}`;
+    document.getElementById('mlc_rate').textContent     = fmtPct(com);
+    document.getElementById('mlc_fee_disp').textContent = fmt(frete);
+    document.getElementById('mlc_comissao').textContent = fmt(r.comR);
+    document.getElementById('mlc_frete').textContent    = fmt(frete);
+    document.getElementById('mlc_ads_pct').textContent  = fmtPct(ads);
+    document.getElementById('mlc_ads').textContent      = fmt(r.adsR);
+    document.getElementById('mlc_imp_pct').textContent  = fmtPct(imp);
+    document.getElementById('mlc_imposto_val').textContent = fmt(r.impR);
+    document.getElementById('mlc_total').textContent    = fmt(r.totF);
+    document.getElementById('mlc_efetivo_pct').textContent = fmtPct(r.ef);
+    document.getElementById('mlc_breakeven').textContent   = fmt(r.bk);
+    document.getElementById('mlc_recomendado').textContent = fmt(r.rc);
+    document.getElementById('mlc_custos').textContent   = fmt(r.totC);
+    document.getElementById('mlc_lucro').textContent    = fmt(r.lucR);
+    document.getElementById('mlc_lucro_sub').textContent= `Lucro líquido: ${fmt(r.lucR)} (${fmtPct(mar)} do preço)`;
+    if (tipoML==='ambos') {
+      document.getElementById('cmp_break_c').textContent = fmt(r.bk);
+      document.getElementById('cmp_rec_c').textContent   = fmt(r.rc);
+      document.getElementById('cmp_lucro_c').textContent = fmt(r.lucR);
+      document.getElementById('cmp_ef_c').textContent    = fmtPct(r.ef);
+    }
+  }
+  if (tipoML==='premium'||tipoML==='ambos') {
+    const com   = parseFloat(document.getElementById('ml_com_p').value)   ||0;
+    const frete = parseFloat(document.getElementById('ml_frete_p').value) ||0;
+    const r = calcMLMode(fixed,com,frete,ads,imp,mar);
+    document.getElementById('mlp_b_name').textContent   = `Comissão: ${com}% · Frete grátis obrigatório`;
+    document.getElementById('mlp_rate').textContent     = fmtPct(com);
+    document.getElementById('mlp_frete_rate').textContent = fmt(frete);
+    document.getElementById('mlp_comissao').textContent = fmt(r.comR);
+    document.getElementById('mlp_frete').textContent    = fmt(frete);
+    document.getElementById('mlp_ads_pct').textContent  = fmtPct(ads);
+    document.getElementById('mlp_ads').textContent      = fmt(r.adsR);
+    document.getElementById('mlp_imp_pct').textContent  = fmtPct(imp);
+    document.getElementById('mlp_imposto_val').textContent = fmt(r.impR);
+    document.getElementById('mlp_total').textContent    = fmt(r.totF);
+    document.getElementById('mlp_efetivo_pct').textContent = fmtPct(r.ef);
+    document.getElementById('mlp_breakeven').textContent   = fmt(r.bk);
+    document.getElementById('mlp_recomendado').textContent = fmt(r.rc);
+    document.getElementById('mlp_custos').textContent   = fmt(r.totC);
+    document.getElementById('mlp_lucro').textContent    = fmt(r.lucR);
+    document.getElementById('mlp_lucro_sub').textContent= `Lucro líquido: ${fmt(r.lucR)} (${fmtPct(mar)} do preço)`;
+    if (tipoML==='ambos') {
+      document.getElementById('cmp_break_p').textContent = fmt(r.bk);
+      document.getElementById('cmp_rec_p').textContent   = fmt(r.rc);
+      document.getElementById('cmp_lucro_p').textContent = fmt(r.lucR);
+      document.getElementById('cmp_ef_p').textContent    = fmtPct(r.ef);
+    }
+  }
+}
+
+function copyRes() {
+  const lines = ['Calculadora dos Sellers 1.0'];
+  if (tipoML==='classico'||tipoML==='ambos') lines.push('','🛒 ML — Clássico',
+    `Mínimo: ${document.getElementById('mlc_breakeven').textContent}`,
+    `Recomendado: ${document.getElementById('mlc_recomendado').textContent}`,
+    `Lucro: ${document.getElementById('mlc_lucro').textContent}`);
+  if (tipoML==='premium'||tipoML==='ambos') lines.push('','🛒 ML — Premium',
+    `Mínimo: ${document.getElementById('mlp_breakeven').textContent}`,
+    `Recomendado: ${document.getElementById('mlp_recomendado').textContent}`,
+    `Lucro: ${document.getElementById('mlp_lucro').textContent}`);
+  lines.push('','🛍️ SHOPEE',
+    `Mínimo: ${document.getElementById('s_breakeven').textContent}`,
+    `Recomendado: ${document.getElementById('s_recomendado').textContent}`,
+    `Lucro: ${document.getElementById('s_lucro').textContent}`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('Copiado!')).catch(()=>alert(lines.join('\n')));
+}
+</script>
+</body>
+</html>
