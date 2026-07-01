@@ -406,74 +406,9 @@
       </div>
     </div>
 
-    <!-- RESULTADOS (primeiro) -->
-    <div class="sec-header ml">📊 Resultados</div>
-    <div class="cell has-header ml-cell" style="padding:14px 16px">
-
-      <!-- Clássico: destaque -->
-      <div id="ml_res_c">
-        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Clássico</div>
-        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlc_recomendado">—</div><div class="rs" id="mlc_lucro_sub">—</div></div>
-        <div class="two-col" style="margin-bottom:6px">
-          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlc_breakeven">—</div></div>
-          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
-        </div>
-      </div>
-
-      <!-- Premium: destaque -->
-      <div id="ml_res_p" style="margin-top:10px">
-        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Premium</div>
-        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlp_recomendado">—</div><div class="rs" id="mlp_lucro_sub">—</div></div>
-        <div class="two-col" style="margin-bottom:6px">
-          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlp_breakeven">—</div></div>
-          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
-        </div>
-      </div>
-
-      <!-- Comparativo compacto -->
-      <div id="ml_cmp" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">⚖️ Comparativo</div>
-        <table class="tbl ml-tbl" style="font-size:11px">
-          <tr><th></th><th>Clássico</th><th>Premium</th></tr>
-          <tr><td style="color:var(--muted)">Recomendado</td><td id="cmp_rec_c" style="font-weight:800">—</td><td id="cmp_rec_p" style="font-weight:800">—</td></tr>
-          <tr><td style="color:var(--muted)">Mínimo</td><td id="cmp_break_c">—</td><td id="cmp_break_p">—</td></tr>
-          <tr><td style="color:var(--muted)">Lucro</td><td id="cmp_lucro_c">—</td><td id="cmp_lucro_p">—</td></tr>
-          <tr><td style="color:var(--muted)">Custo efetivo</td><td id="cmp_ef_c">—</td><td id="cmp_ef_p">—</td></tr>
-        </table>
-      </div>
-
-      <div class="actions">
-        <button class="btn-o" onclick="copyRes('ml')">📋 Copiar resultado</button>
-      </div>
-    </div>
-
-    <!-- BREAKDOWN DETALHADO (por último, menor) -->
-    <div class="sec-header ml" style="margin-top:6px;font-size:10px">🔍 Detalhamento de custos</div>
-    <div class="cell has-header ml-cell" style="padding:12px 14px;font-size:12px">
-      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin-bottom:4px">CLÁSSICO</div>
-      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlc_comissao">—</span></div>
-      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlc_frete">—</span></div>
-      <div class="fee-row"><span class="lbl">ACOS (<span id="mlc_ads_pct">—</span>)</span><span class="val red" id="mlc_ads">—</span></div>
-      <div class="fee-row"><span class="lbl">Imposto (<span id="mlc_imp_pct">—</span>)</span><span class="val red" id="mlc_imposto_val">—</span></div>
-      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlc_total">—</span></div>
-      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlc_efetivo_pct">—</span></div>
-      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin:10px 0 4px">PREMIUM</div>
-      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlp_comissao">—</span></div>
-      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlp_frete">—</span></div>
-      <div class="fee-row"><span class="lbl">ACOS (<span id="mlp_ads_pct">—</span>)</span><span class="val red" id="mlp_ads">—</span></div>
-      <div class="fee-row"><span class="lbl">Imposto (<span id="mlp_imp_pct">—</span>)</span><span class="val red" id="mlp_imposto_val">—</span></div>
-      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlp_total">—</span></div>
-      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlp_efetivo_pct">—</span></div>
-      <!-- IDs ocultos para manter JS funcionando -->
-      <span id="mlc_b_name" style="display:none"></span><span id="mlc_rate" style="display:none"></span>
-      <span id="mlc_fee_disp" style="display:none"></span><span id="mlc_custos" style="display:none"></span>
-      <span id="mlp_b_name" style="display:none"></span><span id="mlp_rate" style="display:none"></span>
-      <span id="mlp_frete_rate" style="display:none"></span><span id="mlp_custos" style="display:none"></span>
-    </div>
-
-    <!-- CONFIGURAÇÕES (por último) -->
+    <!-- CONFIGURAÇÕES (antes dos resultados) -->
     <div class="sec-header ml" style="margin-top:6px;font-size:10px">⚙️ Configurações da plataforma</div>
-    <div class="cell has-header ml-cell" style="padding:12px 14px;margin-bottom:24px">
+    <div class="cell has-header ml-cell" style="padding:12px 14px">
       <div class="field">
         <label style="font-size:12px">Categoria</label>
         <select class="cat-sel" id="ml_categoria" onchange="aplicarCategoria()">
@@ -548,6 +483,63 @@
       </div>
     </div>
 
+    <!-- RESULTADOS -->
+    <div class="sec-header ml">📊 Resultados</div>
+    <div class="cell has-header ml-cell" style="padding:14px 16px">
+      <div id="ml_res_c">
+        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Clássico</div>
+        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlc_recomendado">—</div><div class="rs" id="mlc_lucro_sub">—</div></div>
+        <div class="two-col" style="margin-bottom:6px">
+          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlc_breakeven">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
+        </div>
+      </div>
+      <div id="ml_res_p" style="margin-top:10px">
+        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Premium</div>
+        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlp_recomendado">—</div><div class="rs" id="mlp_lucro_sub">—</div></div>
+        <div class="two-col" style="margin-bottom:6px">
+          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlp_breakeven">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
+        </div>
+      </div>
+      <div id="ml_cmp" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">⚖️ Comparativo</div>
+        <table class="tbl ml-tbl" style="font-size:11px">
+          <tr><th></th><th>Clássico</th><th>Premium</th></tr>
+          <tr><td style="color:var(--muted)">Recomendado</td><td id="cmp_rec_c" style="font-weight:800">—</td><td id="cmp_rec_p" style="font-weight:800">—</td></tr>
+          <tr><td style="color:var(--muted)">Mínimo</td><td id="cmp_break_c">—</td><td id="cmp_break_p">—</td></tr>
+          <tr><td style="color:var(--muted)">Lucro</td><td id="cmp_lucro_c">—</td><td id="cmp_lucro_p">—</td></tr>
+          <tr><td style="color:var(--muted)">Custo efetivo</td><td id="cmp_ef_c">—</td><td id="cmp_ef_p">—</td></tr>
+        </table>
+      </div>
+      <div class="actions">
+        <button class="btn-o" onclick="copyRes('ml')">📋 Copiar resultado</button>
+      </div>
+    </div>
+
+    <!-- DETALHAMENTO -->
+    <div class="sec-header ml" style="margin-top:6px;font-size:10px">🔍 Detalhamento de custos</div>
+    <div class="cell has-header ml-cell" style="padding:12px 14px;font-size:12px;margin-bottom:24px">
+      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin-bottom:4px">CLÁSSICO</div>
+      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlc_comissao">—</span></div>
+      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlc_frete">—</span></div>
+      <div class="fee-row"><span class="lbl">ACOS (<span id="mlc_ads_pct">—</span>)</span><span class="val red" id="mlc_ads">—</span></div>
+      <div class="fee-row"><span class="lbl">Imposto (<span id="mlc_imp_pct">—</span>)</span><span class="val red" id="mlc_imposto_val">—</span></div>
+      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlc_total">—</span></div>
+      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlc_efetivo_pct">—</span></div>
+      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin:10px 0 4px">PREMIUM</div>
+      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlp_comissao">—</span></div>
+      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlp_frete">—</span></div>
+      <div class="fee-row"><span class="lbl">ACOS (<span id="mlp_ads_pct">—</span>)</span><span class="val red" id="mlp_ads">—</span></div>
+      <div class="fee-row"><span class="lbl">Imposto (<span id="mlp_imp_pct">—</span>)</span><span class="val red" id="mlp_imposto_val">—</span></div>
+      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlp_total">—</span></div>
+      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlp_efetivo_pct">—</span></div>
+      <span id="mlc_b_name" style="display:none"></span><span id="mlc_rate" style="display:none"></span>
+      <span id="mlc_fee_disp" style="display:none"></span><span id="mlc_custos" style="display:none"></span>
+      <span id="mlp_b_name" style="display:none"></span><span id="mlp_rate" style="display:none"></span>
+      <span id="mlp_frete_rate" style="display:none"></span><span id="mlp_custos" style="display:none"></span>
+    </div>
+
   </div><!-- /plat_ml -->
 
   <!-- ═══════════════ SHOPEE ═══════════════ -->
@@ -592,22 +584,25 @@
       </div>
     </div>
 
+    <!-- CONFIGURAÇÕES (antes dos resultados) -->
+    <div class="sec-header shopee" style="margin-top:6px;font-size:10px">⚙️ Configurações da plataforma</div>
+    <div class="cell has-header shopee-cell" style="padding:12px 14px">
+      <label class="check-opt">
+        <input type="checkbox" id="s_campanha" onchange="calcShopee()">
+        Campanha de destaque (+2,5%)
+      </label>
+    </div>
+
     <!-- RESULTADOS -->
     <div class="sec-header shopee">📊 Resultados</div>
     <div class="cell has-header shopee-cell" style="padding:14px 16px">
       <div id="s_warn" class="warn-box"></div>
-
-      <!-- PREÇOS EM DESTAQUE — PRIMEIRO -->
       <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="s_recomendado">—</div><div class="rs" id="s_lucro_sub">—</div></div>
       <div class="two-col" style="margin-bottom:6px">
         <div class="rb ro"><div class="rl">💲 Preço mínimo</div><div class="rv" id="s_breakeven">—</div></div>
         <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="s_lucro">—</div></div>
       </div>
-
-      <!-- SEPARADOR -->
       <div style="border-top:1px solid var(--border);margin:10px 0 8px"></div>
-
-      <!-- FAIXA APLICADA + BREAKDOWN — ABAIXO -->
       <div class="bracket-box f2" id="s_bracket" style="padding:8px 12px;margin-bottom:8px;font-size:12px">
         <div class="b-label" style="font-size:9px">Faixa aplicada (automática)</div>
         <div class="b-name" id="s_b_name" style="font-size:12px">—</div>
@@ -626,19 +621,9 @@
         <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val shopee" id="s_efetivo_pct">—</span></div>
       </div>
       <span id="s_custos" style="display:none"></span>
-
       <div class="actions">
         <button class="btn-o" onclick="copyRes('shopee')">📋 Copiar resultado</button>
       </div>
-    </div>
-
-    <!-- CONFIGURAÇÕES (por último) -->
-    <div class="sec-header shopee" style="margin-top:6px;font-size:10px">⚙️ Configurações da plataforma</div>
-    <div class="cell has-header shopee-cell" style="padding:12px 14px;margin-bottom:24px">
-      <label class="check-opt">
-        <input type="checkbox" id="s_campanha" onchange="calcShopee()">
-        Campanha de destaque (+2,5%)
-      </label>
     </div>
 
   </div><!-- /plat_shopee -->
