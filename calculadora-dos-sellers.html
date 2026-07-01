@@ -367,29 +367,117 @@
   <!-- ═══════════════ MERCADO LIVRE ═══════════════ -->
   <div class="plat-section" id="plat_ml">
 
-    <div class="col-header ml">
-      🛒 Mercado Livre Brasil
-      <div class="col-sub">Comissões 2026 · Clássico 11–14% · Premium 16–19% · Frete editável</div>
+
+    <!-- INPUTS: dois blocos lado a lado -->
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div class="sec-header ml">📦 Custos do produto</div>
+        <div class="cell has-header ml-cell">
+          <div class="field">
+            <label>Custo (CMV)</label>
+            <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_costo" value="" min="0" step="0.01" oninput="calcML()"></div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>Embalagem</label>
+            <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_embalagem" value="" min="0" step="0.01" oninput="calcML()"></div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="sec-header ml">📊 Imposto &amp; ACOS</div>
+        <div class="cell has-header ml-cell">
+          <div class="field">
+            <label>Imposto</label>
+            <div class="input-row"><input type="number" id="ml_imposto" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>ACOS Objetivo</label>
+            <div class="input-row"><input type="number" id="ml_ads" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="sec-header ml">📦 Custos do produto</div>
+    <div class="sec-header ml">🎯 Margem de Lucro</div>
     <div class="cell has-header ml-cell">
       <div class="field">
-        <label>Custo do produto (CMV) <span class="hint">quanto você paga pelo item</span></label>
-        <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_costo" value="" min="0" step="0.01" oninput="calcML()"></div>
-      </div>
-      <div class="field">
-        <label>Embalagem <span class="hint">caixa, plástico bolha, etc.</span></label>
-        <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_embalagem" value="" min="0" step="0.01" oninput="calcML()"></div>
+        <label>Margem líquida desejada</label>
+        <div class="input-row"><input type="number" id="ml_margem" value="" min="0" max="70" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
       </div>
     </div>
 
-    <div class="sec-header ml">⚙️ Configurações da plataforma</div>
-    <div class="cell has-header ml-cell">
+    <!-- RESULTADOS (primeiro) -->
+    <div class="sec-header ml">📊 Resultados</div>
+    <div class="cell has-header ml-cell" style="padding:14px 16px">
+
+      <!-- Clássico: destaque -->
+      <div id="ml_res_c">
+        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Clássico</div>
+        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlc_recomendado">—</div><div class="rs" id="mlc_lucro_sub">—</div></div>
+        <div class="two-col" style="margin-bottom:6px">
+          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlc_breakeven">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
+        </div>
+      </div>
+
+      <!-- Premium: destaque -->
+      <div id="ml_res_p" style="margin-top:10px">
+        <div style="font-size:11px;font-weight:800;color:#1B2D71;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px">Premium</div>
+        <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlp_recomendado">—</div><div class="rs" id="mlp_lucro_sub">—</div></div>
+        <div class="two-col" style="margin-bottom:6px">
+          <div class="rb rm"><div class="rl">Preço mínimo</div><div class="rv" id="mlp_breakeven">—</div></div>
+          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
+        </div>
+      </div>
+
+      <!-- Comparativo compacto -->
+      <div id="ml_cmp" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">⚖️ Comparativo</div>
+        <table class="tbl ml-tbl" style="font-size:11px">
+          <tr><th></th><th>Clássico</th><th>Premium</th></tr>
+          <tr><td style="color:var(--muted)">Recomendado</td><td id="cmp_rec_c" style="font-weight:800">—</td><td id="cmp_rec_p" style="font-weight:800">—</td></tr>
+          <tr><td style="color:var(--muted)">Mínimo</td><td id="cmp_break_c">—</td><td id="cmp_break_p">—</td></tr>
+          <tr><td style="color:var(--muted)">Lucro</td><td id="cmp_lucro_c">—</td><td id="cmp_lucro_p">—</td></tr>
+          <tr><td style="color:var(--muted)">Custo efetivo</td><td id="cmp_ef_c">—</td><td id="cmp_ef_p">—</td></tr>
+        </table>
+      </div>
+
+      <div class="actions">
+        <button class="btn-o" onclick="copyRes('ml')">📋 Copiar resultado</button>
+      </div>
+    </div>
+
+    <!-- BREAKDOWN DETALHADO (por último, menor) -->
+    <div class="sec-header ml" style="margin-top:6px;font-size:10px">🔍 Detalhamento de custos</div>
+    <div class="cell has-header ml-cell" style="padding:12px 14px;font-size:12px">
+      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin-bottom:4px">CLÁSSICO</div>
+      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlc_comissao">—</span></div>
+      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlc_frete">—</span></div>
+      <div class="fee-row"><span class="lbl">ACOS (<span id="mlc_ads_pct">—</span>)</span><span class="val red" id="mlc_ads">—</span></div>
+      <div class="fee-row"><span class="lbl">Imposto (<span id="mlc_imp_pct">—</span>)</span><span class="val red" id="mlc_imposto_val">—</span></div>
+      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlc_total">—</span></div>
+      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlc_efetivo_pct">—</span></div>
+      <div style="font-size:10px;font-weight:700;color:#1B2D71;margin:10px 0 4px">PREMIUM</div>
+      <div class="fee-row"><span class="lbl">Comissão</span><span class="val red" id="mlp_comissao">—</span></div>
+      <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlp_frete">—</span></div>
+      <div class="fee-row"><span class="lbl">ACOS (<span id="mlp_ads_pct">—</span>)</span><span class="val red" id="mlp_ads">—</span></div>
+      <div class="fee-row"><span class="lbl">Imposto (<span id="mlp_imp_pct">—</span>)</span><span class="val red" id="mlp_imposto_val">—</span></div>
+      <div class="fee-row"><span class="lbl">Total taxas</span><span class="val ml" id="mlp_total">—</span></div>
+      <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val ml" id="mlp_efetivo_pct">—</span></div>
+      <!-- IDs ocultos para manter JS funcionando -->
+      <span id="mlc_b_name" style="display:none"></span><span id="mlc_rate" style="display:none"></span>
+      <span id="mlc_fee_disp" style="display:none"></span><span id="mlc_custos" style="display:none"></span>
+      <span id="mlp_b_name" style="display:none"></span><span id="mlp_rate" style="display:none"></span>
+      <span id="mlp_frete_rate" style="display:none"></span><span id="mlp_custos" style="display:none"></span>
+    </div>
+
+    <!-- CONFIGURAÇÕES (por último) -->
+    <div class="sec-header ml" style="margin-top:6px;font-size:10px">⚙️ Configurações da plataforma</div>
+    <div class="cell has-header ml-cell" style="padding:12px 14px;margin-bottom:24px">
       <div class="field">
-        <label>Categoria do produto <span class="hint">preenche comissão automaticamente</span></label>
+        <label style="font-size:12px">Categoria</label>
         <select class="cat-sel" id="ml_categoria" onchange="aplicarCategoria()">
-          <option value="">— Selecione a categoria —</option>
+          <option value="">— Selecione —</option>
           <optgroup label="📱 Tecnologia">
             <option value="11|16">Celulares e Smartphones</option>
             <option value="11|16">Computação / Informática</option>
@@ -430,213 +518,128 @@
             <option value="14|19">Indústria e Comércio</option>
           </optgroup>
         </select>
-        <div id="ml_cat_info" style="display:none;margin-top:6px" class="note">
+        <div id="ml_cat_info" style="display:none;margin-top:4px;font-size:11px;color:var(--muted)">
           ✅ <strong id="ml_cat_nome">—</strong> · Clássico <strong id="ml_cat_c">—</strong> · Premium <strong id="ml_cat_p">—</strong>
         </div>
       </div>
-      <div id="ml_ci">
+      <div id="ml_ci" style="margin-top:10px">
         <div class="two-in">
           <div class="field">
-            <label>Comissão Clássico <span class="auto-tag">AUTO</span></label>
+            <label style="font-size:12px">Comissão Clássico <span class="auto-tag">AUTO</span></label>
             <div class="input-row"><input type="number" id="ml_com_c" value="11" min="0" max="30" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
           </div>
           <div class="field">
-            <label>Frete absorvido <span class="hint">R$ 0 = comprador paga</span></label>
+            <label style="font-size:12px">Frete Clássico</label>
             <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_frete_c" value="0" min="0" step="0.50" oninput="calcML()"></div>
           </div>
         </div>
       </div>
-      <div id="ml_pi">
+      <div id="ml_pi" style="margin-top:8px">
         <div class="two-in">
           <div class="field">
-            <label>Comissão Premium <span class="auto-tag">AUTO</span></label>
+            <label style="font-size:12px">Comissão Premium <span class="auto-tag">AUTO</span></label>
             <div class="input-row"><input type="number" id="ml_com_p" value="16" min="0" max="30" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
           </div>
           <div class="field">
-            <label>Frete absorvido — Premium</label>
+            <label style="font-size:12px">Frete Premium</label>
             <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_frete_p" value="18" min="0" step="0.5" oninput="calcML()"></div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="sec-header ml">📊 Imposto &amp; ACOS Objetivo</div>
-    <div class="cell has-header ml-cell">
-      <div class="two-in">
-        <div class="field">
-          <label>Imposto <span class="hint">% sobre a venda</span></label>
-          <div class="input-row"><input type="number" id="ml_imposto" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
-          <div class="note" style="margin-top:4px">Simples ≈6% · MEI isento</div>
-        </div>
-        <div class="field">
-          <label>ACOS Objetivo <span class="hint">% em anúncios</span></label>
-          <div class="input-row"><input type="number" id="ml_ads" value="" min="0" max="50" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
-          <div class="note" style="margin-top:4px">% do faturamento em ads</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="sec-header ml">🎯 Meta de Lucro</div>
-    <div class="cell has-header ml-cell">
-      <div class="field">
-        <label>Margem líquida desejada <span class="hint">% sobre o preço de venda</span></label>
-        <div class="input-row"><input type="number" id="ml_margem" value="" min="0" max="70" step="0.5" oninput="calcML()"><span class="sfx">%</span></div>
-      </div>
-    </div>
-
-    <div class="sec-header ml">📊 Resultados</div>
-    <div class="cell has-header ml-cell" style="padding:16px 18px">
-      <div id="ml_res_c">
-        <div class="ml-bracket">
-          <div class="b-label">Anúncio Clássico</div>
-          <div class="b-name" id="mlc_b_name">—</div>
-          <div style="display:flex;gap:20px;margin:4px 0">
-            <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="mlc_rate">—</div></div>
-            <div><div style="font-size:10px;color:var(--muted)">Frete absorvido</div><div class="b-rate" id="mlc_fee_disp">—</div></div>
-          </div>
-        </div>
-        <div class="fee-row"><span class="lbl">Comissão ML Clássico</span><span class="val red" id="mlc_comissao">—</span></div>
-        <div class="fee-row"><span class="lbl">Frete absorvido pelo vendedor</span><span class="val red" id="mlc_frete">—</span></div>
-        <div class="fee-row"><span class="lbl">ACOS (<span id="mlc_ads_pct">—</span>)</span><span class="val red" id="mlc_ads">—</span></div>
-        <div class="fee-row"><span class="lbl">Imposto (<span id="mlc_imp_pct">—</span>)</span><span class="val red" id="mlc_imposto_val">—</span></div>
-        <div class="fee-row"><span class="lbl"><strong>Total taxas + imposto + ads</strong></span><span class="val ml" id="mlc_total">—</span></div>
-        <div class="fee-row" style="margin-bottom:12px"><span class="lbl">Custo efetivo sobre a venda</span><span class="val ml" id="mlc_efetivo_pct">—</span></div>
-        <div class="rb rm"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="mlc_breakeven">—</div><div class="rs">Abaixo disso você opera no prejuízo</div></div>
-        <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlc_recomendado">—</div><div class="rs" id="mlc_lucro_sub">—</div></div>
-        <div class="two-col">
-          <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="mlc_custos">—</div></div>
-          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
-        </div>
-      </div>
-      <div id="ml_res_p" style="margin-top:16px">
-        <div class="ml-bracket">
-          <div class="b-label">Anúncio Premium</div>
-          <div class="b-name" id="mlp_b_name">—</div>
-          <div style="display:flex;gap:20px;margin:4px 0">
-            <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="mlp_rate">—</div></div>
-            <div><div style="font-size:10px;color:var(--muted)">Frete</div><div class="b-rate" id="mlp_frete_rate">—</div></div>
-          </div>
-        </div>
-        <div class="fee-row"><span class="lbl">Comissão ML Premium</span><span class="val red" id="mlp_comissao">—</span></div>
-        <div class="fee-row"><span class="lbl">Frete absorvido</span><span class="val red" id="mlp_frete">—</span></div>
-        <div class="fee-row"><span class="lbl">ACOS (<span id="mlp_ads_pct">—</span>)</span><span class="val red" id="mlp_ads">—</span></div>
-        <div class="fee-row"><span class="lbl">Imposto (<span id="mlp_imp_pct">—</span>)</span><span class="val red" id="mlp_imposto_val">—</span></div>
-        <div class="fee-row"><span class="lbl"><strong>Total taxas + imposto + ads</strong></span><span class="val ml" id="mlp_total">—</span></div>
-        <div class="fee-row" style="margin-bottom:12px"><span class="lbl">Custo efetivo sobre a venda</span><span class="val ml" id="mlp_efetivo_pct">—</span></div>
-        <div class="rb rm"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="mlp_breakeven">—</div><div class="rs">Abaixo disso você opera no prejuízo</div></div>
-        <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="mlp_recomendado">—</div><div class="rs" id="mlp_lucro_sub">—</div></div>
-        <div class="two-col">
-          <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="mlp_custos">—</div></div>
-          <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
-        </div>
-      </div>
-      <div id="ml_cmp" style="margin-top:16px">
-        <div style="font-size:12px;font-weight:700;color:#1B2D71;margin-bottom:8px">⚖️ Comparativo Clássico vs Premium</div>
-        <table class="tbl ml-tbl">
-          <tr><th></th><th>Clássico</th><th>Premium</th></tr>
-          <tr><td style="color:var(--muted)">Preço mínimo</td><td id="cmp_break_c" style="font-weight:700">—</td><td id="cmp_break_p" style="font-weight:700">—</td></tr>
-          <tr><td style="color:var(--muted)">Preço recomendado</td><td id="cmp_rec_c" style="font-weight:800">—</td><td id="cmp_rec_p" style="font-weight:800">—</td></tr>
-          <tr><td style="color:var(--muted)">Lucro/unidade</td><td id="cmp_lucro_c">—</td><td id="cmp_lucro_p">—</td></tr>
-          <tr><td style="color:var(--muted)">Custo efetivo</td><td id="cmp_ef_c">—</td><td id="cmp_ef_p">—</td></tr>
-        </table>
-      </div>
-      <div class="actions">
-        <button class="btn-o" onclick="window.print()">🖨️ Imprimir</button>
-        <button class="btn-o" onclick="copyRes('ml')">📋 Copiar resultado</button>
-      </div>
-    </div>
-
-
   </div><!-- /plat_ml -->
 
   <!-- ═══════════════ SHOPEE ═══════════════ -->
   <div class="plat-section" id="plat_shopee" style="display:none">
 
-    <div class="col-header shopee">
-      🛍️ Shopee Brasil
-      <div class="col-sub">Faixas de comissão 2026 · Vendedor CNPJ · Detecção automática de faixa</div>
-    </div>
 
-    <div class="sec-header shopee">📦 Custos do produto</div>
-    <div class="cell has-header shopee-cell">
-      <div class="field">
-        <label>Custo do produto (CMV) <span class="hint">quanto você paga pelo item</span></label>
-        <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_costo" value="" min="0" step="0.01" oninput="calcShopee()"></div>
-      </div>
-      <div class="field">
-        <label>Embalagem <span class="hint">caixa, plástico bolha, etc.</span></label>
-        <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_embalagem" value="" min="0" step="0.01" oninput="calcShopee()"></div>
-      </div>
-    </div>
-
-    <div class="sec-header shopee">⚙️ Configurações da plataforma</div>
-    <div class="cell has-header shopee-cell">
-      <div class="field">
-        <label>Campanha de destaque</label>
-        <label class="check-opt" style="margin-top:4px">
-          <input type="checkbox" id="s_campanha" onchange="calcShopee()">
-          Participando de campanha (+2,5% sobre as vendas do período)
-        </label>
-      </div>
-      <div class="note" style="margin-top:12px">
-        A faixa de comissão é detectada automaticamente com base no preço de venda calculado.
-      </div>
-    </div>
-
-    <div class="sec-header shopee">📊 Imposto &amp; ACOS Objetivo</div>
-    <div class="cell has-header shopee-cell">
-      <div class="two-in">
-        <div class="field">
-          <label>Imposto <span class="hint">% sobre a venda</span></label>
-          <div class="input-row"><input type="number" id="s_imposto" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
-          <div class="note" style="margin-top:4px">Simples ≈6% · MEI isento</div>
+    <!-- INPUTS: dois blocos lado a lado -->
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div class="sec-header shopee">📦 Custos do produto</div>
+        <div class="cell has-header shopee-cell">
+          <div class="field">
+            <label>Custo (CMV)</label>
+            <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_costo" value="" min="0" step="0.01" oninput="calcShopee()"></div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>Embalagem</label>
+            <div class="input-row"><span class="pfx">R$</span><input type="number" id="s_embalagem" value="" min="0" step="0.01" oninput="calcShopee()"></div>
+          </div>
         </div>
-        <div class="field">
-          <label>ACOS Objetivo <span class="hint">% em anúncios</span></label>
-          <div class="input-row"><input type="number" id="s_acos" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
-          <div class="note" style="margin-top:4px">ACOS = Ads ÷ Receita</div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="sec-header shopee">📊 Imposto &amp; ACOS</div>
+        <div class="cell has-header shopee-cell">
+          <div class="field">
+            <label>Imposto</label>
+            <div class="input-row"><input type="number" id="s_imposto" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label>ACOS Objetivo</label>
+            <div class="input-row"><input type="number" id="s_acos" value="" min="0" max="50" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="sec-header shopee">🎯 Meta de Lucro</div>
+    <div class="sec-header shopee">🎯 Margem de Lucro</div>
     <div class="cell has-header shopee-cell">
       <div class="field">
-        <label>Margem líquida desejada <span class="hint">% sobre o preço de venda</span></label>
+        <label>Margem líquida desejada</label>
         <div class="input-row"><input type="number" id="s_margem" value="" min="0" max="70" step="0.5" oninput="calcShopee()"><span class="sfx">%</span></div>
       </div>
     </div>
 
+    <!-- RESULTADOS -->
     <div class="sec-header shopee">📊 Resultados</div>
-    <div class="cell has-header shopee-cell" style="padding:16px 18px">
+    <div class="cell has-header shopee-cell" style="padding:14px 16px">
       <div id="s_warn" class="warn-box"></div>
-      <div class="bracket-box f2" id="s_bracket">
-        <div class="b-label">Faixa aplicada (automática)</div>
-        <div class="b-name" id="s_b_name">—</div>
-        <div style="display:flex;gap:20px;margin:4px 0">
-          <div><div style="font-size:10px;color:var(--muted)">Comissão</div><div class="b-rate" id="s_b_rate">—</div></div>
-          <div><div style="font-size:10px;color:var(--muted)">Taxa fixa</div><div class="b-rate" id="s_b_fee">—</div></div>
-        </div>
-        <div class="b-det" id="s_b_det">—</div>
-      </div>
-      <div class="fee-row"><span class="lbl">Comissão Shopee</span><span class="val red" id="s_comissao">—</span></div>
-      <div class="fee-row"><span class="lbl">Taxa fixa por item</span><span class="val red" id="s_taxa_fixa">—</span></div>
-      <div class="fee-row"><span class="lbl">ACOS (<span id="s_acos_pct">—</span>)</span><span class="val red" id="s_ads">—</span></div>
-      <div class="fee-row"><span class="lbl">Imposto (<span id="s_imp_pct">—</span>)</span><span class="val red" id="s_imposto_val">—</span></div>
-      <div class="fee-row"><span class="lbl"><strong>Total Shopee + ads + imposto</strong></span><span class="val shopee" id="s_total">—</span></div>
-      <div class="fee-row" style="margin-bottom:12px"><span class="lbl">Custo efetivo sobre a venda</span><span class="val shopee" id="s_efetivo_pct">—</span></div>
-      <div class="rb ro"><div class="rl">💲 Preço mínimo (breakeven)</div><div class="rv" id="s_breakeven">—</div><div class="rs">Abaixo disso você opera no prejuízo</div></div>
-      <div class="rb rg"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="s_recomendado">—</div><div class="rs" id="s_lucro_sub">—</div></div>
-      <div class="two-col">
-        <div class="rb ry"><div class="rl">Custos totais</div><div class="rv" id="s_custos">—</div></div>
+
+      <!-- PREÇOS EM DESTAQUE — PRIMEIRO -->
+      <div class="rb rg" style="margin-bottom:6px"><div class="rl">🚀 Preço recomendado</div><div class="rv" id="s_recomendado">—</div><div class="rs" id="s_lucro_sub">—</div></div>
+      <div class="two-col" style="margin-bottom:6px">
+        <div class="rb ro"><div class="rl">💲 Preço mínimo</div><div class="rv" id="s_breakeven">—</div></div>
         <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="s_lucro">—</div></div>
       </div>
+
+      <!-- SEPARADOR -->
+      <div style="border-top:1px solid var(--border);margin:10px 0 8px"></div>
+
+      <!-- FAIXA APLICADA + BREAKDOWN — ABAIXO -->
+      <div class="bracket-box f2" id="s_bracket" style="padding:8px 12px;margin-bottom:8px;font-size:12px">
+        <div class="b-label" style="font-size:9px">Faixa aplicada (automática)</div>
+        <div class="b-name" id="s_b_name" style="font-size:12px">—</div>
+        <div style="display:flex;gap:14px;margin-top:3px">
+          <div><div style="font-size:9px;color:var(--muted)">Comissão</div><div style="font-size:13px;font-weight:800" id="s_b_rate">—</div></div>
+          <div><div style="font-size:9px;color:var(--muted)">Taxa fixa</div><div style="font-size:13px;font-weight:800" id="s_b_fee">—</div></div>
+        </div>
+        <div class="b-det" id="s_b_det" style="display:none"></div>
+      </div>
+      <div style="font-size:12px">
+        <div class="fee-row"><span class="lbl">Comissão Shopee</span><span class="val red" id="s_comissao">—</span></div>
+        <div class="fee-row"><span class="lbl">Taxa fixa</span><span class="val red" id="s_taxa_fixa">—</span></div>
+        <div class="fee-row"><span class="lbl">ACOS (<span id="s_acos_pct">—</span>)</span><span class="val red" id="s_ads">—</span></div>
+        <div class="fee-row"><span class="lbl">Imposto (<span id="s_imp_pct">—</span>)</span><span class="val red" id="s_imposto_val">—</span></div>
+        <div class="fee-row"><span class="lbl">Total taxas</span><span class="val shopee" id="s_total">—</span></div>
+        <div class="fee-row"><span class="lbl">Custo efetivo</span><span class="val shopee" id="s_efetivo_pct">—</span></div>
+      </div>
+      <span id="s_custos" style="display:none"></span>
+
       <div class="actions">
-        <button class="btn-o" onclick="window.print()">🖨️ Imprimir</button>
         <button class="btn-o" onclick="copyRes('shopee')">📋 Copiar resultado</button>
       </div>
     </div>
 
+    <!-- CONFIGURAÇÕES (por último) -->
+    <div class="sec-header shopee" style="margin-top:6px;font-size:10px">⚙️ Configurações da plataforma</div>
+    <div class="cell has-header shopee-cell" style="padding:12px 14px;margin-bottom:24px">
+      <label class="check-opt">
+        <input type="checkbox" id="s_campanha" onchange="calcShopee()">
+        Campanha de destaque (+2,5%)
+      </label>
+    </div>
 
   </div><!-- /plat_shopee -->
 
