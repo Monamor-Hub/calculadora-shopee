@@ -434,14 +434,6 @@
           ✅ <strong id="ml_cat_nome">—</strong> · Clássico <strong id="ml_cat_c">—</strong> · Premium <strong id="ml_cat_p">—</strong>
         </div>
       </div>
-      <div class="field">
-        <label>Tipo de anúncio</label>
-        <div class="toggle-row">
-          <button class="tog on" id="btn_c" onclick="setTipoML('classico')">Clássico</button>
-          <button class="tog"    id="btn_p" onclick="setTipoML('premium')">Premium</button>
-          <button class="tog"    id="btn_a" onclick="setTipoML('ambos')">Comparar ambos</button>
-        </div>
-      </div>
       <div id="ml_ci">
         <div class="two-in">
           <div class="field">
@@ -454,7 +446,7 @@
           </div>
         </div>
       </div>
-      <div id="ml_pi" style="display:none">
+      <div id="ml_pi">
         <div class="two-in">
           <div class="field">
             <label>Comissão Premium <span class="auto-tag">AUTO</span></label>
@@ -465,10 +457,6 @@
             <div class="input-row"><span class="pfx">R$</span><input type="number" id="ml_frete_p" value="18" min="0" step="0.5" oninput="calcML()"></div>
           </div>
         </div>
-      </div>
-      <div class="note" id="ml_tipo_hint">
-        <strong>Clássico:</strong> 11–14% de comissão · parcelamento com juros ao comprador.<br>
-        <strong>Premium:</strong> 16–19% de comissão · parcelamento em 12x sem juros ao comprador.
       </div>
     </div>
 
@@ -520,7 +508,7 @@
           <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlc_lucro">—</div></div>
         </div>
       </div>
-      <div id="ml_res_p" style="display:none;margin-top:16px">
+      <div id="ml_res_p" style="margin-top:16px">
         <div class="ml-bracket">
           <div class="b-label">Anúncio Premium</div>
           <div class="b-name" id="mlp_b_name">—</div>
@@ -542,7 +530,7 @@
           <div class="rb rg"><div class="rl">Lucro/unidade</div><div class="rv" id="mlp_lucro">—</div></div>
         </div>
       </div>
-      <div id="ml_cmp" style="display:none;margin-top:16px">
+      <div id="ml_cmp" style="margin-top:16px">
         <div style="font-size:12px;font-weight:700;color:#1B2D71;margin-bottom:8px">⚖️ Comparativo Clássico vs Premium</div>
         <table class="tbl ml-tbl">
           <tr><th></th><th>Clássico</th><th>Premium</th></tr>
@@ -782,23 +770,6 @@ function calcShopee() {
 }
 
 /* ── MERCADO LIVRE ── */
-let tipoML = 'classico';
-function setTipoML(t) {
-  tipoML = t;
-  document.getElementById('btn_c').classList.toggle('on', t==='classico'||t==='ambos');
-  document.getElementById('btn_p').classList.toggle('on', t==='premium' ||t==='ambos');
-  document.getElementById('btn_a').classList.toggle('on', t==='ambos');
-  document.getElementById('ml_ci').style.display   = (t==='classico'||t==='ambos') ? '' : 'none';
-  document.getElementById('ml_pi').style.display   = (t==='premium' ||t==='ambos') ? '' : 'none';
-  document.getElementById('ml_res_c').style.display = (t==='classico'||t==='ambos') ? '' : 'none';
-  document.getElementById('ml_res_p').style.display = (t==='premium' ||t==='ambos') ? '' : 'none';
-  document.getElementById('ml_cmp').style.display   = t==='ambos' ? '' : 'none';
-  const h = document.getElementById('ml_tipo_hint');
-  h.innerHTML = t==='classico' ? '<strong>Clássico:</strong> 11–14% comissão · parcelamento com juros ao comprador.'
-    : t==='premium' ? '<strong>Premium:</strong> 16–19% comissão · 12x sem juros ao comprador.'
-    : 'Comparando <strong>Clássico</strong> e <strong>Premium</strong> simultaneamente.';
-  calcML();
-}
 function calcMLMode(fixed, com, frete, ads, imp, mar) {
   const vB=(com+ads+imp)/100, vR=(com+ads+imp+mar)/100;
   const bk=(1-vB)>0?(fixed+frete)/(1-vB):0;
@@ -813,7 +784,8 @@ function calcML() {
   const imp = parseFloat(document.getElementById('ml_imposto').value)||0;
   const mar = parseFloat(document.getElementById('ml_margem').value) ||0;
   const ads = parseFloat(document.getElementById('ml_ads').value)    ||0;
-  if (tipoML==='classico'||tipoML==='ambos') {
+  // Clássico
+  {
     const com=parseFloat(document.getElementById('ml_com_c').value)||0;
     const frete=parseFloat(document.getElementById('ml_frete_c').value)||0;
     const r=calcMLMode(fixed,com,frete,ads,imp,mar);
@@ -833,14 +805,13 @@ function calcML() {
     document.getElementById('mlc_custos').textContent   = fmt(r.totC);
     document.getElementById('mlc_lucro').textContent    = fmt(r.lucR);
     document.getElementById('mlc_lucro_sub').textContent= `Lucro líquido: ${fmt(r.lucR)} (${fmtPct(mar)} do preço)`;
-    if (tipoML==='ambos') {
-      document.getElementById('cmp_break_c').textContent=fmt(r.bk);
-      document.getElementById('cmp_rec_c').textContent=fmt(r.rc);
-      document.getElementById('cmp_lucro_c').textContent=fmt(r.lucR);
-      document.getElementById('cmp_ef_c').textContent=fmtPct(r.ef);
-    }
+    document.getElementById('cmp_break_c').textContent=fmt(r.bk);
+    document.getElementById('cmp_rec_c').textContent=fmt(r.rc);
+    document.getElementById('cmp_lucro_c').textContent=fmt(r.lucR);
+    document.getElementById('cmp_ef_c').textContent=fmtPct(r.ef);
   }
-  if (tipoML==='premium'||tipoML==='ambos') {
+  // Premium
+  {
     const com=parseFloat(document.getElementById('ml_com_p').value)||0;
     const frete=parseFloat(document.getElementById('ml_frete_p').value)||0;
     const r=calcMLMode(fixed,com,frete,ads,imp,mar);
@@ -860,23 +831,21 @@ function calcML() {
     document.getElementById('mlp_custos').textContent   = fmt(r.totC);
     document.getElementById('mlp_lucro').textContent    = fmt(r.lucR);
     document.getElementById('mlp_lucro_sub').textContent= `Lucro líquido: ${fmt(r.lucR)} (${fmtPct(mar)} do preço)`;
-    if (tipoML==='ambos') {
-      document.getElementById('cmp_break_p').textContent=fmt(r.bk);
-      document.getElementById('cmp_rec_p').textContent=fmt(r.rc);
-      document.getElementById('cmp_lucro_p').textContent=fmt(r.lucR);
-      document.getElementById('cmp_ef_p').textContent=fmtPct(r.ef);
-    }
+    document.getElementById('cmp_break_p').textContent=fmt(r.bk);
+    document.getElementById('cmp_rec_p').textContent=fmt(r.rc);
+    document.getElementById('cmp_lucro_p').textContent=fmt(r.lucR);
+    document.getElementById('cmp_ef_p').textContent=fmtPct(r.ef);
   }
 }
 
 function copyRes(plat) {
   let lines = ['Calculadora dos Sellers 1.0'];
   if (plat==='ml') {
-    if (tipoML==='classico'||tipoML==='ambos') lines.push('','🛒 ML — Clássico',
+    lines.push('','🛒 ML — Clássico',
       `Mínimo: ${document.getElementById('mlc_breakeven').textContent}`,
       `Recomendado: ${document.getElementById('mlc_recomendado').textContent}`,
       `Lucro: ${document.getElementById('mlc_lucro').textContent}`);
-    if (tipoML==='premium'||tipoML==='ambos') lines.push('','🛒 ML — Premium',
+    lines.push('','🛒 ML — Premium',
       `Mínimo: ${document.getElementById('mlp_breakeven').textContent}`,
       `Recomendado: ${document.getElementById('mlp_recomendado').textContent}`,
       `Lucro: ${document.getElementById('mlp_lucro').textContent}`);
