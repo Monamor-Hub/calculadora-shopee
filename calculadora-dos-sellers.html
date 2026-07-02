@@ -53,37 +53,7 @@
     background-image: linear-gradient(to right, #28261f 0%, #262624 40%, #262624 60%, #2a221d 100%);
   }
 
-  /* ── PERSISTÊNCIA DE CAMPOS ── */
-const SAVE_KEY = 'cds_fields_v1';
-const FIELD_IDS = [
-  'ml_costo','ml_embalagem','ml_imposto','ml_ads','ml_margem',
-  'ml_categoria','ml_com_c','ml_frete_c','ml_com_p','ml_frete_p',
-  's_costo','s_embalagem','s_imposto','s_acos','s_margem','s_campanha'
-];
-function saveFields() {
-  const data = {};
-  FIELD_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    data[id] = el.type === 'checkbox' ? el.checked : el.value;
-  });
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
-}
-function restoreFields() {
-  let data = null;
-  try { const s = localStorage.getItem(SAVE_KEY); if (s) data = JSON.parse(s); } catch(e) {}
-  if (!data) return;
-  FIELD_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el || !(id in data)) return;
-    if (el.type === 'checkbox') el.checked = data[id];
-    else el.value = data[id];
-  });
-  const cat = document.getElementById('ml_categoria');
-  if (cat && cat.value) aplicarCategoria();
-}
-
-/* ── GATE ── */
+  /* ── GATE ── */
   #gate {
     position: fixed; inset: 0;
     background: linear-gradient(135deg, #1B2D71 0%, #EE4D2D 100%);
@@ -689,6 +659,36 @@ function setPlat(p) {
   let p = null; try { p = localStorage.getItem('cds_plat'); } catch(e) {}
   setPlat(p === 'shopee' ? 'shopee' : 'ml');
 })();
+
+/* ── PERSISTÊNCIA DE CAMPOS ── */
+const SAVE_KEY = 'cds_fields_v1';
+const FIELD_IDS = [
+  'ml_costo','ml_embalagem','ml_imposto','ml_ads','ml_margem',
+  'ml_categoria','ml_com_c','ml_frete_c','ml_com_p','ml_frete_p',
+  's_costo','s_embalagem','s_imposto','s_acos','s_margem','s_campanha'
+];
+function saveFields() {
+  const data = {};
+  FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    data[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function restoreFields() {
+  let data = null;
+  try { const s = localStorage.getItem(SAVE_KEY); if (s) data = JSON.parse(s); } catch(e) {}
+  if (!data) return;
+  FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !(id in data)) return;
+    if (el.type === 'checkbox') el.checked = data[id];
+    else el.value = data[id];
+  });
+  const cat = document.getElementById('ml_categoria');
+  if (cat && cat.value) aplicarCategoria();
+}
 
 /* ── GATE ── */
 function verificarSenha() {
