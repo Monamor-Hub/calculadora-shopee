@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora dos Sellers 1.0</title><!-- v1.0.1 -->
+<title>Calculadora dos Sellers 1.0</title>
 <style>
   :root {
     --shopee:    #EE4D2D;
@@ -696,6 +696,7 @@ function verificarSenha() {
     document.getElementById('gate').style.display = 'none';
     document.getElementById('app').style.display  = '';
     restoreFields();
+    // Salvar em qualquer mudança futura
     document.getElementById('app').addEventListener('input',  saveFields);
     document.getElementById('app').addEventListener('change', saveFields);
     calcShopee(); calcML();
